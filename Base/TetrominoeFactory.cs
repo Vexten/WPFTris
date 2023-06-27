@@ -45,7 +45,7 @@ namespace WPFTris.Base
         {
             new Polyminoe.State(new Point<int>[]
             {
-                new Point<int>(1,-1), new Point<int>(0,-1), new Point<int>(0,0), new Point<int>(-1,0)
+                new Point<int>(1,0), new Point<int>(0,0), new Point<int>(0,1), new Point<int>(-1,1)
             }),
             new Polyminoe.State(new Point<int>[]
             {
@@ -104,10 +104,10 @@ namespace WPFTris.Base
         private static readonly Polyminoe.State[][] tetrominoes = { I, O, T, S, Z, L, J };
         private static readonly int tetrominoe_count = tetrominoes.Length;
 
-        private Random rnd;
+        private readonly Random rnd;
         private int last;
 
-        public struct Tetrominoe
+        public readonly struct Tetrominoe
         {
             public readonly Polyminoe shape;
             public readonly Pieces name;
@@ -154,7 +154,7 @@ namespace WPFTris.Base
             return new Tetrominoe(new Polyminoe(ref tetrominoes[roll]), (Pieces)roll);
         }
 
-        public Tetrominoe GetTetrominoe(Pieces piece)
+        public static Tetrominoe GetTetrominoe(Pieces piece)
         {
             return new Tetrominoe(new Polyminoe(ref tetrominoes[(int)piece]), piece);
         }

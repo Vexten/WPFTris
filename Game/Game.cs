@@ -12,14 +12,14 @@ namespace WPFTris.Game
         public const int FieldAdditionalSpace = 2;
 
         private static readonly int[] scoring = { 40, 100, 300, 1200 };
-        private TetrominoeFactory factory;
+        private readonly TetrominoeFactory factory;
         private TetrominoeFactory.Tetrominoe curr, next;
-        private int w, h;
-        private int[,] field;
+        private readonly int w, h;
+        private readonly int[,] field;
         private Point<int> basePoint;
         private Point<int> currPoint;
         private bool linesWereCleared;
-        private Stack<int> clearedLines;
+        private readonly Stack<int> clearedLines;
         private int linesClearedTillLevel;
         private int level;
         private int score;
@@ -186,7 +186,7 @@ namespace WPFTris.Game
 
         public TetrominoeFactory.Tetrominoe NextPiece => next;
 
-        public Point<int> CurrentPoint => new Point<int>(currPoint);
+        public Point<int> CurrentPoint => new(currPoint);
 
         public int Score => score;
 

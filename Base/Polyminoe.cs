@@ -46,8 +46,8 @@ namespace WPFTris.Base
                 states[i].Right = states[i + 1];
                 states[i + 1].Left = states[i];
             }
-            states[states.Length - 1].Right = states[0];
-            states[0].Left = states[states.Length - 1];
+            states[^1].Right = states[0];
+            states[0].Left = states[^1];
             currentState = states[0];
 
         }
@@ -85,9 +85,9 @@ namespace WPFTris.Base
 
     internal class PolyminoeEnumerator : IEnumerator<Point<int>>
     {
-        private Polyminoe p;
-        private Polyminoe.State enumState;
-        private IEnumerator<Point<int>> enumerator;
+        private readonly Polyminoe p;
+        private readonly Polyminoe.State enumState;
+        private readonly IEnumerator<Point<int>> enumerator;
 
         private Point<int> GetCurrent()
         {

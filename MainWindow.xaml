@@ -78,10 +78,24 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <Label Name="LevelLabel" Grid.Row="0">
+                    
+                </Label>
+                <Label Name="ScoreLabel" Grid.Row="1">
+
+                </Label>
+            </Grid>
+            
             <Border Grid.Row="1" BorderBrush="Black" BorderThickness="2" Style="{StaticResource BaseSquare}">
                 <Viewbox Name="NextPieceView" Margin="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    
-                </Viewbox>   
+
+                </Viewbox>
             </Border>
         </Grid>
     </Grid>

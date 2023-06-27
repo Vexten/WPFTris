@@ -24,11 +24,11 @@ namespace WPFTris
 
         private delegate void SetLineColor(int line, Brush b);
 
-        private GameThreaded g;
-        private int w, h;
-        private EasyGrid<Cell>[] pieceDisplays;
-        private EasyGrid<Cell> easyField;
-        private DispatcherTimer lineAnimTimer;
+        private readonly GameThreaded g;
+        private readonly int w, h;
+        private readonly EasyGrid<Cell>[] pieceDisplays;
+        private readonly EasyGrid<Cell> easyField;
+        private readonly DispatcherTimer lineAnimTimer;
         private readonly int baseAnimTicks;
         private int animTicks;
         private int[] lines;
@@ -47,15 +47,19 @@ namespace WPFTris
             _DisplayNext(g.NextPiece.name);
 
             g.PieceDrop += _NewPiece;
-            g.LineClear += _AnimateLineClear;
+            g.LineClear += _LineClear;
             g.PieceMove += _DrawFieldLocal;
             g.Redraw += () => { Dispatcher.BeginInvoke(_DrawField); };
+            g.Loss += () => { Dispatcher.BeginInvoke(_DrawField); };
 
-            lineAnimTimer = new DispatcherTimer();
+            lineAnimTimer = new();
             lineAnimTimer.Interval = TimeSpan.FromMilliseconds(20);
             baseAnimTicks = 20;
             animTicks = baseAnimTicks;
             lineAnimTimer.Tick += _Animation;
+
+            LevelLabel.Content = $"Level: {g.Level}";
+            ScoreLabel.Content = $"Score: {g.Score}";
 
             g.Start();
         }
@@ -63,22 +67,21 @@ namespace WPFTris
 
         private void _SetPieceDisplays()
         {
-            TetrominoeFactory factory = new TetrominoeFactory();
             foreach (int piece in Enum.GetValues(typeof(TetrominoeFactory.Pieces)).Cast<int>())
             {
-                pieceDisplays[piece] = _CreatePieceDisplay(factory.GetTetrominoe((TetrominoeFactory.Pieces)piece).shape);
+                pieceDisplays[piece] = _CreatePieceDisplay(TetrominoeFactory.GetTetrominoe((TetrominoeFactory.Pieces)piece).shape);
             }
         }
 
         private EasyGrid<Cell> _CreatePieceDisplay(Polyminoe piece)
         {
-            Grid g = new Grid();
+            Grid g = new();
             g.RowDefinitions.Add(new RowDefinition());
             g.ColumnDefinitions.Add(new ColumnDefinition());
             g.Height = displayCellSize;
             g.Width = displayCellSize;
-            Point<int> topLeft = new Point<int>(0,0);
-            Point<int> bottomRight = new Point<int>(0,0);
+            Point<int> topLeft = new(0,0);
+            Point<int> bottomRight = new(0,0);
             foreach (var p in piece)
             {
                 if (p.x < topLeft.x) topLeft.x = p.x;
@@ -98,7 +101,7 @@ namespace WPFTris
                 g.RowDefinitions.Add(new RowDefinition());
                 g.Height += displayCellSize;
             }
-            EasyGrid<Cell> ret = new EasyGrid<Cell>(g);
+            EasyGrid<Cell> ret = new(g);
             foreach (var p in piece)
             {
                 var pt = p + topLeft;
@@ -118,12 +121,15 @@ namespace WPFTris
         {
             Dispatcher.BeginInvoke(_DrawField);
             Dispatcher.BeginInvoke(_DisplayNext, g.NextPiece.name);
+            Dispatcher.BeginInvoke(() => { ScoreLabel.Content = $"Score: {g.Score}"; });
         }
 
-        private void _AnimateLineClear(int[] lines)
+        private void _LineClear(int[] lines)
         {
             g.Pause();
             this.lines = lines;
+            Dispatcher.BeginInvoke(() => { LevelLabel.Content = $"Level: {g.Level}"; });
+            Dispatcher.BeginInvoke(() => { ScoreLabel.Content = $"Score: {g.Score}"; });
             lineAnimTimer.Start();
         }
 
@@ -138,7 +144,7 @@ namespace WPFTris
                 return;
             }
             byte c = (byte)(255 - (255 * animTicks / baseAnimTicks));
-            SolidColorBrush b = new SolidColorBrush(Color.FromRgb(255, c, c));
+            SolidColorBrush b = new(Color.FromRgb(255, c, c));
             foreach (var line in lines)
             {
                 for (int x = 0; x < w; x++)
@@ -192,7 +198,7 @@ namespace WPFTris
                 _Clamp(0, p.y + 3, h - 1));
         }
 
-        private T _Clamp<T>(T min, T n, T max) where T : INumber<T>
+        private static T _Clamp<T>(T min, T n, T max) where T : INumber<T>
         {
             if (n < min) return min;
             if (n > max) return max;

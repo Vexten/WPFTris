@@ -5,7 +5,7 @@ namespace WPFTris.Helpers
 {
     internal class EasyGrid<T> where T : UIElement, new()
     {
-        private Grid g;
+        private readonly Grid g;
         public Grid Grid { get { return g; } }
         private T[,] elements;
         public T this[int x, int y]
@@ -21,6 +21,7 @@ namespace WPFTris.Helpers
             }
         }
 
+#pragma warning disable CS8618
         public EasyGrid(int w, int h)
         {
             g = new Grid();
@@ -40,6 +41,7 @@ namespace WPFTris.Helpers
             this.g = g;
             _PopulateGrid(g);
         }
+#pragma warning restore CS8618
 
         private void _PopulateGrid(Grid g)
         {

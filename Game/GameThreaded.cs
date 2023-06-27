@@ -12,14 +12,14 @@ namespace WPFTris.Game
         public const int InitialFallInterval = PollInterval * 50;
         public const int MinFallInterval = PollInterval * 5;
 
-        private Game g;
-        private Thread mainThread;
-        private Queue<Moves> moves;
-        private Stopwatch tickWatch;
+        private readonly Game g;
+        private readonly Thread mainThread;
+        private readonly Queue<Moves> moves;
+        private readonly Stopwatch tickWatch;
         private int currentFallInterval;
         private int fallTimer;
         private bool operate;
-        private ManualResetEvent m;
+        private readonly ManualResetEvent m;
 
         private void _Loop()
         {
@@ -31,7 +31,7 @@ namespace WPFTris.Game
                 m.WaitOne();
                 tickWatch.Start();
 
-                fallTimer = fallTimer - PollInterval;
+                fallTimer -= PollInterval;
                 if (fallTimer < 1)
                 {
                     if (moves.Count > 0)
@@ -88,7 +88,7 @@ namespace WPFTris.Game
 
         private void _RecalculateFallInterval(int[] lines)
         {
-            currentFallInterval = InitialFallInterval - g.Level * PollInterval;
+            currentFallInterval = InitialFallInterval - g.Level * (PollInterval * 2);
             if (currentFallInterval < MinFallInterval) currentFallInterval = MinFallInterval;
         }
 
