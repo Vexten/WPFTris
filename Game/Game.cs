@@ -193,19 +193,19 @@ namespace WPFTris.Game
         public int Level => level;
 
         public delegate void RedrawHandler();
-        public event RedrawHandler Redraw;
+        public event RedrawHandler? Redraw;
 
         public delegate void LineClearHandler(int[] lines);
-        public event LineClearHandler LineClear;
+        public event LineClearHandler? LineClear;
 
         public delegate void PieceDropHandler();
-        public event PieceDropHandler PieceDrop;
+        public event PieceDropHandler? PieceDrop;
 
         public delegate void PieceMoveHandler();
-        public event PieceMoveHandler PieceMove;
+        public event PieceMoveHandler? PieceMove;
 
         public delegate void LossHandler();
-        public event LossHandler Loss;
+        public event LossHandler? Loss;
 
         public enum MovementDir
         {
@@ -244,7 +244,7 @@ namespace WPFTris.Game
                 changed = false;
             }
             _SetPiece((int)curr.name);
-            if (changed) PieceMove();
+            if (changed) PieceMove?.Invoke();
         }
 
         public void MovePiece(MovementDir dir)
@@ -263,7 +263,7 @@ namespace WPFTris.Game
                 if (_PieceCollides()) currPoint.x -= 1;
             }
             _SetPiece((int)curr.name);
-            if (currPoint.x != ox) PieceMove();
+            if (currPoint.x != ox) PieceMove?.Invoke();
         }
 
         public void Slam()
@@ -278,6 +278,7 @@ namespace WPFTris.Game
                     break;
             }
             currPoint.y -= 1;
+            score += (currPoint.y - top) * 5;
             Advance();
         }
 

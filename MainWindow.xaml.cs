@@ -33,6 +33,7 @@ namespace WPFTris
         private int animTicks;
         private int[] lines;
 
+#pragma warning disable CS8618
         public MainWindow()
         {
             InitializeComponent();
@@ -58,6 +59,7 @@ namespace WPFTris
 
             g.Start();
         }
+#pragma warning restore CS8618
 
         private void _SetPieceDisplays()
         {

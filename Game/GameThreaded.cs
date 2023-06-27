@@ -8,8 +8,9 @@ namespace WPFTris.Game
 {
     internal class GameThreaded
     {
-        public const int InitialFallInterval = 500;
         public const int PollInterval = 10;
+        public const int InitialFallInterval = PollInterval * 50;
+        public const int MinFallInterval = PollInterval * 5;
 
         private Game g;
         private Thread mainThread;
@@ -23,6 +24,8 @@ namespace WPFTris.Game
         private void _Loop()
         {
             int sleepTime;
+            g.LineClear += _RecalculateFallInterval;
+
             while (operate)
             {
                 m.WaitOne();
@@ -83,6 +86,12 @@ namespace WPFTris.Game
             }
         }
 
+        private void _RecalculateFallInterval(int[] lines)
+        {
+            currentFallInterval = InitialFallInterval - g.Level * PollInterval;
+            if (currentFallInterval < MinFallInterval) currentFallInterval = MinFallInterval;
+        }
+
         public enum Moves
         {
             RotateLeft,
@@ -93,6 +102,7 @@ namespace WPFTris.Game
             Slam
         }
 
+        #region Game_fake_overrides
         public event Game.LineClearHandler LineClear
         {
             add { g.LineClear += value; }
@@ -135,6 +145,7 @@ namespace WPFTris.Game
         {
             return g.FieldAt(x, y);
         }
+        #endregion
 
         public GameThreaded(int w, int h)
         {

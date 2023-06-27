@@ -7,6 +7,7 @@ namespace WPFTris.Base
 {
     internal class Polyminoe : IEnumerable<Point<int>>
     {
+#pragma warning disable CS8618
         public class State
         {
 
@@ -25,6 +26,7 @@ namespace WPFTris.Base
                 return this;
             }
         }
+#pragma warning restore CS8618
 
         public enum RotationDir
         {

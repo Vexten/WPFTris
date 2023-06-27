@@ -25,8 +25,8 @@ namespace WPFTris.Base
             y = T.CreateChecked(p.y);
         }
 
-        public static Point<T> operator +(Point<T> left, Point<T> right) => new Point<T>(left.x + right.x, left.y + right.y);
-        public static Point<T> operator -(Point<T> left, Point<T> right) => new Point<T>(left.x - right.x, left.y - right.y);
-        public static Point<T> operator -(Point<T> p) => new Point<T>(-p.x, -p.y);
+        public static Point<T> operator +(Point<T> left, Point<T> right) => new(left.x + right.x, left.y + right.y);
+        public static Point<T> operator -(Point<T> left, Point<T> right) => new(left.x - right.x, left.y - right.y);
+        public static Point<T> operator -(Point<T> p) => new(-p.x, -p.y);
     }
 }
