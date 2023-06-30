@@ -9,6 +9,7 @@ using System.Windows.Threading;
 using WPFTris.Game;
 using WPFTris.Helpers;
 using WPFTris.Base;
+using WPFTris.Graphics;
 
 namespace WPFTris
 {
