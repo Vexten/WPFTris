@@ -25,7 +25,7 @@ namespace WPFTris.Graphics
 
         private int w;
         private int h;
-        private ImageDrawing[,] tiles;
+        private UIElement[,] tiles;
 
         static FieldView()
         {
@@ -34,28 +34,62 @@ namespace WPFTris.Graphics
                 typeof(int),
                 typeof(FieldView),
                 new FrameworkPropertyMetadata(
-                    20,
+                    0,
                     FrameworkPropertyMetadataOptions.AffectsMeasure |
-                    FrameworkPropertyMetadataOptions.AffectsRender)
+                    FrameworkPropertyMetadataOptions.AffectsRender,
+                    new PropertyChangedCallback(_TileSizeChanged),
+                    new CoerceValueCallback(_ClampToOne))
                 );
             WidthInTilesProperty = DependencyProperty.Register(
-                "Width",
+                "WidthInTiles",
                 typeof(int),
                 typeof(FieldView),
                 new FrameworkPropertyMetadata(
-                    10,
+                    0,
                     FrameworkPropertyMetadataOptions.AffectsMeasure |
-                    FrameworkPropertyMetadataOptions.AffectsRender)
+                    FrameworkPropertyMetadataOptions.AffectsRender,
+                    new PropertyChangedCallback(_WidthInTilesChanged))
                 );
             HeightInTilesProperty = DependencyProperty.Register(
-                "Height",
+                "HeightInTiles",
                 typeof(int),
                 typeof(FieldView),
                 new FrameworkPropertyMetadata(
-                    20,
+                    0,
                     FrameworkPropertyMetadataOptions.AffectsMeasure |
-                    FrameworkPropertyMetadataOptions.AffectsRender)
+                    FrameworkPropertyMetadataOptions.AffectsRender,
+                    new PropertyChangedCallback(_HeightInTilesChanged))
                 );
+        }
+
+        private static object _ClampToOne(DependencyObject d, object baseValue)
+        {
+            return (int)baseValue > 0 ? (int)baseValue : 1;
+        }
+
+        private static void _HeightInTilesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            FieldView f = ((FieldView)d);
+            f.HeightInTiles = (int)e.NewValue;
+            f.Height = f.HeightInTiles * f.TileSize;
+            f._ImGoingInsane();
+        }
+
+        private static void _WidthInTilesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            FieldView f = ((FieldView)d);
+            f.WidthInTiles = (int)e.NewValue;
+            f.Width = f.WidthInTiles * f.TileSize;
+            f._ImGoingInsane();
+        }
+
+        private static void _TileSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            FieldView f = ((FieldView)d);
+            f.TileSize = (int)e.NewValue;
+            f.Height = f.HeightInTiles * f.TileSize;
+            f.Width = f.WidthInTiles * f.TileSize;
+            f._ImGoingInsane();
         }
 
         public int TileSize
@@ -79,8 +113,6 @@ namespace WPFTris.Graphics
         public FieldView()
         {
             InitializeComponent();
-            tiles = new ImageDrawing[WidthInTiles, HeightInTiles];
-            _CreateTiles(TileSize);
         }
 
         public void TileBlock(int x, int y, Color color)
@@ -93,17 +125,76 @@ namespace WPFTris.Graphics
 
         }
 
+        private BitmapImage _LoadImageFromContentByUri(string uri)
+        {
+            Uri tileSpriteUri = new(uri);
+            StreamResourceInfo inf = Application.GetContentStream(tileSpriteUri);
+            BitmapImage image = new();
+            image.BeginInit();
+            image.StreamSource = inf.Stream;
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.EndInit();
+            image.Freeze();
+            return image;
+        }
+
         private void _CreateTiles(int tileSize)
         {
-            Uri tileSpriteUri = new("pack://application:,,,/img/tile_overlay.png");
-            BitmapImage tileSprite = new(tileSpriteUri);
+            BitmapImage tileSprite = _LoadImageFromContentByUri(@"pack://application:,,,/img/tile_overlay.png");
             for (int x = 0; x < w; x++)
             {
                 for (int y = 0; y < h; y++)
                 {
-                    tiles[x, y] = new(tileSprite, new Rect(x*tileSize, y*tileSize, tileSize, tileSize));
-                    AddChild(tiles[x, y]);
+                    Image t = new Image
+                    {
+                        Source = tileSprite,
+                        Width = tileSize,
+                        Height = tileSize,
+                    };
+                    RenderOptions.SetBitmapScalingMode(t, BitmapScalingMode.NearestNeighbor);
+                    Canvas.SetLeft(t, x * tileSize - (tileSize * w / 2));
+                    Canvas.SetTop(t, y * tileSize - (tileSize * h / 2));
+                    Field.Children.Add(t);
+                    tiles[x, y] = t;
                 }
+            }
+        }
+
+        private void _CreateDesignerPreview(int tileSize)
+        {
+            Thickness th = new Thickness(2);
+            for (int x = 0; x < w; x++)
+            {
+                for (int y = 0; y < h; y++)
+                {
+                    Border b = new Border
+                    {
+                        BorderBrush = Brushes.Black,
+                        BorderThickness = th,
+                        Width = tileSize,
+                        Height = tileSize,
+                    };
+                    Canvas.SetLeft(b, x * tileSize);
+                    Canvas.SetTop(b, y * tileSize);
+                    Field.Children.Add(b);
+                }
+            }
+        }
+
+        private void _ImGoingInsane()
+        {
+            w = WidthInTiles;
+            h = HeightInTiles;
+            Field.Children.Clear();
+            try
+            {
+                tiles = new Image[WidthInTiles, HeightInTiles];
+                _CreateTiles(TileSize);
+            }
+            catch (Exception)
+            {
+                //tiles = new Border[WidthInTiles, HeightInTiles];
+                _CreateDesignerPreview(TileSize);
             }
         }
     }

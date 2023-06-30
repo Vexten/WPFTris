@@ -26,7 +26,7 @@
                 <RowDefinition Height="8*"/>
             </Grid.RowDefinitions>
 
-            <controls:FieldView Grid.Row="1"  TileSize="20" Width="10" Height="20">
+            <controls:FieldView Grid.Row="1" TileSize="20" WidthInTiles="10" HeightInTiles="11">
                 
             </controls:FieldView>
         </Grid>
