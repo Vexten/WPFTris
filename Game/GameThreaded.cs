@@ -141,6 +141,8 @@ namespace WPFTris.Game
 
         public int Level => g.Level;
 
+        public int TotalLines => g.TotalLines;
+
         public int FieldAt(int x, int y)
         {
             return g.FieldAt(x, y);

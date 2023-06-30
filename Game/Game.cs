@@ -21,8 +21,11 @@ namespace WPFTris.Game
         private bool linesWereCleared;
         private readonly Stack<int> clearedLines;
         private int linesClearedTillLevel;
+
         private int level;
         private int score;
+        private int totalLines;
+        private int[] totalPieces;
 
         #region private_methods
         private void _SetField()
@@ -42,6 +45,8 @@ namespace WPFTris.Game
             level = 0;
             linesClearedTillLevel = 10;
             score = 0;
+            totalLines = 0;
+            Array.Clear(totalPieces, 0, totalPieces.Length);
             currPoint = new Point<int>(basePoint);
             curr = factory.GetTetrominoe();
             next = factory.GetTetrominoe();
@@ -114,7 +119,8 @@ namespace WPFTris.Game
             }
             if (clearedLines.Count > 0)
             {
-                score += scoring[clearedLines.Count] * (level + 1);
+                totalLines += clearedLines.Count;
+                score += scoring[clearedLines.Count - 1] * (level + 1);
                 linesClearedTillLevel -= clearedLines.Count;
                 if (linesClearedTillLevel < 1)
                 {
@@ -192,6 +198,8 @@ namespace WPFTris.Game
 
         public int Level => level;
 
+        public int TotalLines => totalLines;
+
         public delegate void RedrawHandler();
         public event RedrawHandler? Redraw;
 
@@ -221,6 +229,7 @@ namespace WPFTris.Game
             field = new int[w, h + FieldAdditionalSpace];
             basePoint = new Point<int>(w / 2, -1);
             clearedLines = new Stack<int>();
+            totalPieces = new int[Enum.GetNames(typeof(TetrominoeFactory.Pieces)).Length];
             _Init();
         }
 
@@ -271,7 +280,7 @@ namespace WPFTris.Game
             _SetPiece(FieldEmpty);
             int ttop = _GetFilledHeight();
             int top = currPoint.y < ttop ? currPoint.y : ttop;
-            for (int y = top; y < h + 1; y++)
+            for (int y = top + 1; y < h + 1; y++)
             {
                 currPoint.y = y;
                 if (_PieceCollides())

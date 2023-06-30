@@ -130,6 +130,7 @@ namespace WPFTris
             this.lines = lines;
             Dispatcher.BeginInvoke(() => { LevelLabel.Content = $"Level: {g.Level}"; });
             Dispatcher.BeginInvoke(() => { ScoreLabel.Content = $"Score: {g.Score}"; });
+            Dispatcher.BeginInvoke(() => { TotalLinesDisplay.Content = $"Lines: {g.TotalLines}"; });
             lineAnimTimer.Start();
         }
 
