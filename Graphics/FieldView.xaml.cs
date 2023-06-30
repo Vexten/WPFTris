@@ -152,8 +152,8 @@ namespace WPFTris.Graphics
                         Height = tileSize,
                     };
                     RenderOptions.SetBitmapScalingMode(t, BitmapScalingMode.NearestNeighbor);
-                    Canvas.SetLeft(t, x * tileSize - (tileSize * w / 2));
-                    Canvas.SetTop(t, y * tileSize - (tileSize * h / 2));
+                    Canvas.SetLeft(t, x * tileSize);
+                    Canvas.SetTop(t, y * tileSize);
                     Field.Children.Add(t);
                     tiles[x, y] = t;
                 }
