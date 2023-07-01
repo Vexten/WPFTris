@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,13 @@ namespace WPFTris.Graphics
 
         private int w;
         private int h;
-        private UIElement[,] tiles;
+        private Tile[,] tiles;
+
+        private struct Tile
+        {
+            public UIElement foreground;
+            public UIElement background;
+        }
 
         static FieldView()
         {
@@ -34,7 +41,7 @@ namespace WPFTris.Graphics
                 typeof(int),
                 typeof(FieldView),
                 new FrameworkPropertyMetadata(
-                    0,
+                    1,
                     FrameworkPropertyMetadataOptions.AffectsMeasure |
                     FrameworkPropertyMetadataOptions.AffectsRender,
                     new PropertyChangedCallback(_TileSizeChanged),
@@ -45,20 +52,22 @@ namespace WPFTris.Graphics
                 typeof(int),
                 typeof(FieldView),
                 new FrameworkPropertyMetadata(
-                    0,
+                    1,
                     FrameworkPropertyMetadataOptions.AffectsMeasure |
                     FrameworkPropertyMetadataOptions.AffectsRender,
-                    new PropertyChangedCallback(_WidthInTilesChanged))
+                    new PropertyChangedCallback(_WidthInTilesChanged),
+                    new CoerceValueCallback(_ClampToOne))
                 );
             HeightInTilesProperty = DependencyProperty.Register(
                 "HeightInTiles",
                 typeof(int),
                 typeof(FieldView),
                 new FrameworkPropertyMetadata(
-                    0,
+                    1,
                     FrameworkPropertyMetadataOptions.AffectsMeasure |
                     FrameworkPropertyMetadataOptions.AffectsRender,
-                    new PropertyChangedCallback(_HeightInTilesChanged))
+                    new PropertyChangedCallback(_HeightInTilesChanged),
+                    new CoerceValueCallback(_ClampToOne))
                 );
         }
 
@@ -117,15 +126,25 @@ namespace WPFTris.Graphics
 
         public void TileBlock(int x, int y, Color color)
         {
-
+            Rectangle r = (Rectangle)tiles[x, y].background;
+            if (r.Fill is SolidColorBrush b)
+            {
+                if (b.Color != color)
+                { 
+                    r.Fill = new SolidColorBrush(color);
+                }
+            }
+            tiles[x, y].foreground.Visibility = Visibility.Visible;
+            tiles[x ,y].background.Visibility = Visibility.Visible;
         }
 
         public void TileBackground(int x, int y)
         {
-
+            tiles[x, y].foreground.Visibility = Visibility.Hidden;
+            tiles[x, y].background.Visibility = Visibility.Hidden;
         }
 
-        private BitmapImage _LoadImageFromContentByUri(string uri)
+        private static BitmapImage _LoadImageFromContentByUri(string uri)
         {
             Uri tileSpriteUri = new(uri);
             StreamResourceInfo inf = Application.GetContentStream(tileSpriteUri);
@@ -145,17 +164,31 @@ namespace WPFTris.Graphics
             {
                 for (int y = 0; y < h; y++)
                 {
-                    Image t = new Image
+                    int xc = x * tileSize;
+                    int yc = y * tileSize;
+                    Image i = new Image
                     {
                         Source = tileSprite,
                         Width = tileSize,
                         Height = tileSize,
                     };
-                    RenderOptions.SetBitmapScalingMode(t, BitmapScalingMode.NearestNeighbor);
-                    Canvas.SetLeft(t, x * tileSize);
-                    Canvas.SetTop(t, y * tileSize);
-                    Field.Children.Add(t);
-                    tiles[x, y] = t;
+                    RenderOptions.SetBitmapScalingMode(i, BitmapScalingMode.NearestNeighbor);
+                    Canvas.SetLeft(i, xc);
+                    Canvas.SetTop(i, yc);
+                    Canvas.SetZIndex(i, 1);
+                    Rectangle r = new Rectangle
+                    {
+                        Fill = Brushes.White,
+                        Height = tileSize,
+                        Width = tileSize,
+                    };
+                    Canvas.SetLeft(r, xc);
+                    Canvas.SetTop(r, yc);
+                    Canvas.SetZIndex(r, 0);
+                    Field.Children.Add(i);
+                    Field.Children.Add(r);
+                    tiles[x, y] = new Tile { foreground = i, background = r };
+                    TileBackground(x, y);
                 }
             }
         }
@@ -188,12 +221,12 @@ namespace WPFTris.Graphics
             Field.Children.Clear();
             try
             {
-                tiles = new Image[WidthInTiles, HeightInTiles];
+                tiles = new Tile[WidthInTiles, HeightInTiles];
                 _CreateTiles(TileSize);
             }
-            catch (Exception)
+            catch (System.NullReferenceException ex)
             {
-                //tiles = new Border[WidthInTiles, HeightInTiles];
+                Trace.WriteLine($"Exception {ex} on /img/tile_overlay.png, either the file is missing or you are currently inside of a designer");
                 _CreateDesignerPreview(TileSize);
             }
         }
