@@ -140,7 +140,7 @@ namespace WPFTris
             {
                 animTicks = baseAnimTicks;
                 lineAnimTimer.Stop();
-                g.QueueMove(GameThreaded.Moves.Advance);
+                g.QueueMove(GameThreaded.Move.Advance);
                 g.Resume();
                 return;
             }
@@ -216,22 +216,22 @@ namespace WPFTris
             switch (e.Key)
             {
                 case Key.Left:
-                    g.QueueMove(GameThreaded.Moves.MoveLeft);
+                    g.QueueMove(GameThreaded.Move.MoveLeft);
                     break;
                 case Key.Right:
-                    g.QueueMove(GameThreaded.Moves.MoveRight);
+                    g.QueueMove(GameThreaded.Move.MoveRight);
                     break;
                 case Key.Down:
-                    g.QueueMove(GameThreaded.Moves.Advance);
+                    g.QueueMove(GameThreaded.Move.Advance);
                     break;
                 case Key.Z:
-                    g.QueueMove(GameThreaded.Moves.RotateLeft);
+                    g.QueueMove(GameThreaded.Move.RotateLeft);
                     break;
                 case Key.X:
-                    g.QueueMove(GameThreaded.Moves.RotateRight);
+                    g.QueueMove(GameThreaded.Move.RotateRight);
                     break;
                 case Key.Space:
-                    g.QueueMove(GameThreaded.Moves.Slam);
+                    g.QueueMove(GameThreaded.Move.Slam);
                     break;  
             }
         }

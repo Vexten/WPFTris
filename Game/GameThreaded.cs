@@ -14,7 +14,7 @@ namespace WPFTris.Game
 
         private readonly Game g;
         private readonly Thread mainThread;
-        private readonly Queue<Moves> moves;
+        private readonly Queue<Move> moves;
         private readonly Stopwatch tickWatch;
         private int currentFallInterval;
         private int fallTimer;
@@ -36,16 +36,16 @@ namespace WPFTris.Game
                 {
                     if (moves.Count > 0)
                     {
-                        if (moves.ElementAt(moves.Count - 1) != Moves.Slam)
+                        Move last = moves.ElementAt(moves.Count - 1);
+                        if (last != Move.Slam || last != Move.Advance)
                         {
-                            moves.Enqueue(Moves.Advance);
+                            moves.Enqueue(Move.Advance);
                         }
                     }
                     else
                     {
-                        moves.Enqueue(Moves.Advance);
+                        moves.Enqueue(Move.Advance);
                     }
-                    fallTimer = currentFallInterval;
                 }
                 _DoMoves();
 
@@ -62,23 +62,23 @@ namespace WPFTris.Game
             {
                 switch (moves.Dequeue())
                 {
-                    case Moves.Advance:
+                    case Move.Advance:
                         g.Advance();
                         fallTimer = currentFallInterval;
                         break;
-                    case Moves.RotateLeft:
+                    case Move.RotateLeft:
                         g.RotatePiece(Polyminoe.RotationDir.Left);
                         break;
-                    case Moves.RotateRight:
+                    case Move.RotateRight:
                         g.RotatePiece(Polyminoe.RotationDir.Right);
                         break;
-                    case Moves.MoveLeft:
+                    case Move.MoveLeft:
                         g.MovePiece(Game.MovementDir.Left);
                         break;
-                    case Moves.MoveRight:
+                    case Move.MoveRight:
                         g.MovePiece(Game.MovementDir.Right);
                         break;
-                    case Moves.Slam:
+                    case Move.Slam:
                         g.Slam();
                         fallTimer = currentFallInterval;
                         break;
@@ -92,7 +92,7 @@ namespace WPFTris.Game
             if (currentFallInterval < MinFallInterval) currentFallInterval = MinFallInterval;
         }
 
-        public enum Moves
+        public enum Move
         {
             RotateLeft,
             RotateRight,
@@ -153,7 +153,7 @@ namespace WPFTris.Game
         {
             g = new Game(w, h);
             mainThread = new Thread(_Loop);
-            moves = new Queue<Moves>();
+            moves = new Queue<Move>();
             tickWatch = new Stopwatch();
             fallTimer = InitialFallInterval;
             currentFallInterval = InitialFallInterval;
@@ -161,7 +161,7 @@ namespace WPFTris.Game
             operate = true;
         }
 
-        public void QueueMove(Moves move)
+        public void QueueMove(Move move)
         {
             moves.Enqueue(move);
         }
