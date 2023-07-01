@@ -35,6 +35,7 @@ namespace WPFTris.Graphics
         private Tile[,] tiles;
         private BitmapImage tileOverlay;
         private BitmapImage backgroundTile;
+        private Dictionary<Color, SolidColorBrush> brushCache;
 
         private struct Tile
         {
@@ -192,6 +193,7 @@ namespace WPFTris.Graphics
         public FieldView()
         {
             InitializeComponent();
+            brushCache = new();
         }
 
         public void TileBlock(int x, int y, Color color)
@@ -200,8 +202,17 @@ namespace WPFTris.Graphics
             if (r.Fill is SolidColorBrush b)
             {
                 if (b.Color != color)
-                { 
-                    r.Fill = new SolidColorBrush(color);
+                {
+                    SolidColorBrush? brush;
+                    if (brushCache.TryGetValue(color, out brush))
+                    {
+                        r.Fill = brush;
+                    }
+                    else
+                    {
+                        brushCache[color] = new SolidColorBrush(color);
+                        r.Fill = brushCache[color];
+                    }
                 }
             }
             tiles[x, y].foreground.Visibility = Visibility.Visible;
