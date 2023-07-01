@@ -27,9 +27,9 @@
                 <RowDefinition Height="8*"/>
             </Grid.RowDefinitions>
 
-            <controls:FieldView x:Name="FieldView" Grid.Row="1" TileSize="20" WidthInTiles="10" HeightInTiles="20">
-                
-            </controls:FieldView>
+            <controls:FieldView x:Name="FieldView" Grid.Row="1"
+                                TileSize="20" WidthInTiles="10" HeightInTiles="20"
+                                TileOverlay="img/tile_overlay.png" BackgroundTile="img/tile_background.png"/>
         </Grid>
 
         <Grid Grid.Column="1" Name="Tetris">
