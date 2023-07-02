@@ -3,9 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:WPFTris.Graphics"
         xmlns:local="clr-namespace:WPFTris"
         mc:Ignorable="d"
-        Title="Tetris" Height="600" Width="800" ResizeMode="NoResize" KeyDown="Window_KeyDown" Closed="Window_Closed">
+        Title="Tetris" Height="600" Width="800" ResizeMode="NoResize"
+        KeyDown="Window_KeyDown" Closed="Window_Closed">
     <Window.Resources>
         <Style x:Key="BaseSquare" TargetType="FrameworkElement">
             <Setter Property="Width" Value="{Binding RelativeSource={RelativeSource Mode=Self},Path=ActualHeight}"/>
@@ -24,6 +26,11 @@
                 <RowDefinition Height="2*"/>
                 <RowDefinition Height="8*"/>
             </Grid.RowDefinitions>
+
+            <controls:FieldView x:Name="FieldView" Grid.Row="1"
+                                TileSize="20" WidthInTiles="10" HeightInTiles="20"
+                                TileOverlay="img/tile_overlay.png" BackgroundTile="img/tile_background.png"
+                                LineClearFadeOut="5000"/>
         </Grid>
 
         <Grid Grid.Column="1" Name="Tetris">

@@ -9,6 +9,7 @@ using System.Windows.Threading;
 using WPFTris.Game;
 using WPFTris.Helpers;
 using WPFTris.Base;
+using WPFTris.Graphics;
 
 namespace WPFTris
 {
@@ -54,7 +55,7 @@ namespace WPFTris
 
             lineAnimTimer = new();
             lineAnimTimer.Interval = TimeSpan.FromMilliseconds(20);
-            baseAnimTicks = 20;
+            baseAnimTicks = 100;
             animTicks = baseAnimTicks;
             lineAnimTimer.Tick += _Animation;
 
@@ -131,6 +132,10 @@ namespace WPFTris
             Dispatcher.BeginInvoke(() => { LevelLabel.Content = $"Level: {g.Level}"; });
             Dispatcher.BeginInvoke(() => { ScoreLabel.Content = $"Score: {g.Score}"; });
             Dispatcher.BeginInvoke(() => { TotalLinesDisplay.Content = $"Lines: {g.TotalLines}"; });
+            foreach (var line in lines)
+            {
+                Dispatcher.BeginInvoke(() => { FieldView.LineClear(line); });
+            }
             lineAnimTimer.Start();
         }
 
@@ -172,12 +177,15 @@ namespace WPFTris
                     {
                         case Game.Game.FieldCleared:
                             _SetCellBackground(x, y, Brushes.Red, easyField);
+                            FieldView.TileBlock(x, y, Color.FromRgb(255,0,0));
                             break;
                         case Game.Game.FieldEmpty:
                             _SetCellBackground(x, y, Brushes.White, easyField);
+                            FieldView.TileBackground(x, y);
                             break;
                         default:
                             _SetCellBackground(x, y, Brushes.Black, easyField);
+                            FieldView.TileBlock(x, y, Color.FromRgb(0, 0, 255));
                             break;
                     }
                 }
