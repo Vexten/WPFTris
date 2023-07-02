@@ -11,6 +11,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Resources;
@@ -28,7 +29,8 @@ namespace WPFTris.Graphics
             WidthInTilesProperty,
             HeightInTilesProperty,
             TileOverlayProperty,
-            BackgroundTileProperty;
+            BackgroundTileProperty,
+            LineClearFadeOutProperty;
 
         private int w;
         private int h;
@@ -36,11 +38,15 @@ namespace WPFTris.Graphics
         private BitmapImage tileOverlay;
         private BitmapImage backgroundTile;
         private Dictionary<Color, SolidColorBrush> brushCache;
+        private DoubleAnimation tileSizeAnim;
+        private DoubleAnimation tilePosAnim;
+        private Storyboard tileFadeOut;
+        private int animatedTileCounter;
 
         private struct Tile
         {
-            public UIElement foreground;
-            public UIElement background;
+            public FrameworkElement foreground;
+            public FrameworkElement background;
         }
 
         static FieldView()
@@ -52,7 +58,9 @@ namespace WPFTris.Graphics
                 new FrameworkPropertyMetadata(
                     1,
                     FrameworkPropertyMetadataOptions.AffectsMeasure |
-                    FrameworkPropertyMetadataOptions.AffectsRender,
+                    FrameworkPropertyMetadataOptions.AffectsRender |
+                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure,
                     new PropertyChangedCallback(_TileSizeChanged),
                     new CoerceValueCallback(_ClampToOne))
                 );
@@ -63,7 +71,9 @@ namespace WPFTris.Graphics
                 new FrameworkPropertyMetadata(
                     1,
                     FrameworkPropertyMetadataOptions.AffectsMeasure |
-                    FrameworkPropertyMetadataOptions.AffectsRender,
+                    FrameworkPropertyMetadataOptions.AffectsRender |
+                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure,
                     new PropertyChangedCallback(_WidthInTilesChanged),
                     new CoerceValueCallback(_ClampToOne))
                 );
@@ -74,7 +84,9 @@ namespace WPFTris.Graphics
                 new FrameworkPropertyMetadata(
                     1,
                     FrameworkPropertyMetadataOptions.AffectsMeasure |
-                    FrameworkPropertyMetadataOptions.AffectsRender,
+                    FrameworkPropertyMetadataOptions.AffectsRender |
+                    FrameworkPropertyMetadataOptions.AffectsParentArrange |
+                    FrameworkPropertyMetadataOptions.AffectsParentMeasure,
                     new PropertyChangedCallback(_HeightInTilesChanged),
                     new CoerceValueCallback(_ClampToOne))
                 );
@@ -96,6 +108,23 @@ namespace WPFTris.Graphics
                     FrameworkPropertyMetadataOptions.AffectsRender,
                     new PropertyChangedCallback(_BackgroundTileChanged))
                 );
+            LineClearFadeOutProperty = DependencyProperty.Register(
+                "LineClearFadeOut",
+                typeof(int),
+                typeof(FieldView),
+                new FrameworkPropertyMetadata(
+                    200,
+                    new PropertyChangedCallback(_LineFadeOutChanged))
+                );
+        }
+
+        #region DependencyPropertyHandlers
+        private static void _LineFadeOutChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if ((int)e.NewValue == (int)e.OldValue) return;
+            FieldView f = (FieldView)d;
+            f.LineClearFadeOut = (int)e.NewValue;
+            f._ChangeAnimTime();
         }
 
         private static void _BackgroundTileChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -136,6 +165,7 @@ namespace WPFTris.Graphics
 
         private static void _HeightInTilesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            if ((int)e.NewValue == (int)e.OldValue) return;
             FieldView f = ((FieldView)d);
             f.HeightInTiles = (int)e.NewValue;
             f.Height = f.HeightInTiles * f.TileSize;
@@ -144,6 +174,7 @@ namespace WPFTris.Graphics
 
         private static void _WidthInTilesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            if ((int)e.NewValue == (int)e.OldValue) return;
             FieldView f = ((FieldView)d);
             f.WidthInTiles = (int)e.NewValue;
             f.Width = f.WidthInTiles * f.TileSize;
@@ -152,12 +183,35 @@ namespace WPFTris.Graphics
 
         private static void _TileSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            if ((int)e.NewValue == (int)e.OldValue) return;
             FieldView f = ((FieldView)d);
             f.TileSize = (int)e.NewValue;
             f.Height = f.HeightInTiles * f.TileSize;
             f.Width = f.WidthInTiles * f.TileSize;
             f._ImGoingInsane();
             f._SetBackground();
+            f._ChangeAnimScale();
+        }
+        #endregion
+
+        private static BitmapImage _BMPFromContentByUri(string uri)
+        {
+            Uri imageUri = new(uri);
+            StreamResourceInfo inf;
+            inf = Application.GetContentStream(imageUri);
+            if (inf == null)
+            {
+                Trace.WriteLine($"{uri} doesn't exist, or you are currently inside of Designer.\n" +
+                    $"Falling back on error sprite.");
+                inf = Application.GetResourceStream(new Uri(@"pack://application:,,,/WPFTris;component/img/error_sprite.png"));
+            }
+            BitmapImage image = new();
+            image.BeginInit();
+            image.StreamSource = inf.Stream;
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.EndInit();
+            image.Freeze();
+            return image;
         }
 
         public int TileSize
@@ -190,10 +244,32 @@ namespace WPFTris.Graphics
             set { SetValue(TileOverlayProperty, value); }
         }
 
+        public int LineClearFadeOut
+        {
+            get { return (int)GetValue(LineClearFadeOutProperty); }
+            set { SetValue(LineClearFadeOutProperty, value); }
+        }
+
+        public event EventHandler LineClearAnimCompleted;
+
         public FieldView()
         {
             InitializeComponent();
             brushCache = new();
+            tileSizeAnim = new();
+            tilePosAnim = new();
+            tileSizeAnim.To = 0;
+            tileSizeAnim.FillBehavior = FillBehavior.Stop;
+            tilePosAnim.FillBehavior = FillBehavior.Stop;
+            Storyboard.SetTargetProperty(tileSizeAnim, new PropertyPath(WidthProperty));
+            Storyboard.SetTargetProperty(tileSizeAnim, new PropertyPath(HeightProperty));
+            Storyboard.SetTargetProperty(tilePosAnim, new PropertyPath(Canvas.LeftProperty));
+            Storyboard.SetTargetProperty(tilePosAnim, new PropertyPath(Canvas.TopProperty));
+            tileFadeOut = new();
+            tileFadeOut.Children.Add(tileSizeAnim);
+            tileFadeOut.Children.Add(tilePosAnim);
+            tileFadeOut.Completed += _TileAnimCompleted;
+            animatedTileCounter = 0;
         }
 
         public void TileBlock(int x, int y, Color color)
@@ -225,24 +301,19 @@ namespace WPFTris.Graphics
             tiles[x, y].background.Visibility = Visibility.Hidden;
         }
 
-        private static BitmapImage _BMPFromContentByUri(string uri)
+        public void LineClear(int line)
         {
-            Uri imageUri = new(uri);
-            StreamResourceInfo inf;
-            inf = Application.GetContentStream(imageUri);
-            if (inf == null)
+            if (line < 0) return;
+            for (int x = 0; x < w; x++)
             {
-                Trace.WriteLine($"{uri} doesn't exist, or you are currently inside of Designer.\n" +
-                    $"Falling back on error sprite.");
-                inf = Application.GetResourceStream(new Uri(@"pack://application:,,,/WPFTris;component/img/error_sprite.png"));
+                Tile t = tiles[x, line];
+                ((Rectangle)t.background).Fill = Brushes.White;
+                tileFadeOut.Seek(t.foreground, TimeSpan.Zero, TimeSeekOrigin.BeginTime);
+                tileFadeOut.Resume(t.foreground);
+                tileFadeOut.Seek(t.background, TimeSpan.Zero, TimeSeekOrigin.BeginTime);
+                tileFadeOut.Resume(t.background);
+                animatedTileCounter += 2;
             }
-            BitmapImage image = new();
-            image.BeginInit();
-            image.StreamSource = inf.Stream;
-            image.CacheOption = BitmapCacheOption.OnLoad;
-            image.EndInit();
-            image.Freeze();
-            return image;
         }
 
         private void _CreateTiles(int tileSize)
@@ -273,7 +344,13 @@ namespace WPFTris.Graphics
                     Canvas.SetTop(r, yc);
                     Canvas.SetZIndex(r, 0);
                     Field.Children.Add(i);
+                    tileFadeOut.Begin(i, true);
+                    tileFadeOut.Pause(i);
+                    i.Visibility = Visibility.Hidden;
                     Field.Children.Add(r);
+                    tileFadeOut.Begin(r, true);
+                    tileFadeOut.Pause(r);
+                    r.Visibility = Visibility.Hidden;
                     tiles[x, y] = new Tile { foreground = i, background = r };
                 }
             }
@@ -297,6 +374,37 @@ namespace WPFTris.Graphics
                 Viewport = new Rect(new Point(0, 0), new Point(TileSize, TileSize)),
                 ViewportUnits = BrushMappingMode.Absolute
             };
+        }
+
+        private void _ChangeAnimTime()
+        {
+            Duration d = new Duration(TimeSpan.FromMilliseconds(LineClearFadeOut));
+            tileSizeAnim.Duration = d;
+            tilePosAnim.Duration = d;
+            foreach (var tile in tiles)
+            {
+                tileFadeOut.Remove(tile.foreground);
+                tileFadeOut.Begin(tile.foreground, true);
+                tileFadeOut.Pause(tile.foreground);
+                tileFadeOut.Remove(tile.foreground);
+                tileFadeOut.Begin(tile.foreground, true);
+                tileFadeOut.Pause(tile.foreground);
+            }
+        }
+
+        private void _ChangeAnimScale()
+        {
+            tileSizeAnim.From = TileSize;
+            tilePosAnim.By = TileSize / 2;
+        }
+
+        private void _TileAnimCompleted(object? sender, EventArgs e)
+        {
+            animatedTileCounter--;
+            if (animatedTileCounter == 0)
+            {
+                LineClearAnimCompleted?.Invoke(this, new EventArgs());
+            }
         }
     }
 }

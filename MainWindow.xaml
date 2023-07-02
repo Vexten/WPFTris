@@ -29,7 +29,8 @@
 
             <controls:FieldView x:Name="FieldView" Grid.Row="1"
                                 TileSize="20" WidthInTiles="10" HeightInTiles="20"
-                                TileOverlay="img/tile_overlay.png" BackgroundTile="img/tile_background.png"/>
+                                TileOverlay="img/tile_overlay.png" BackgroundTile="img/tile_background.png"
+                                LineClearFadeOut="5000"/>
         </Grid>
 
         <Grid Grid.Column="1" Name="Tetris">

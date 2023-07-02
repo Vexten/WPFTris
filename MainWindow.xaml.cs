@@ -55,7 +55,7 @@ namespace WPFTris
 
             lineAnimTimer = new();
             lineAnimTimer.Interval = TimeSpan.FromMilliseconds(20);
-            baseAnimTicks = 20;
+            baseAnimTicks = 100;
             animTicks = baseAnimTicks;
             lineAnimTimer.Tick += _Animation;
 
@@ -132,6 +132,10 @@ namespace WPFTris
             Dispatcher.BeginInvoke(() => { LevelLabel.Content = $"Level: {g.Level}"; });
             Dispatcher.BeginInvoke(() => { ScoreLabel.Content = $"Score: {g.Score}"; });
             Dispatcher.BeginInvoke(() => { TotalLinesDisplay.Content = $"Lines: {g.TotalLines}"; });
+            foreach (var line in lines)
+            {
+                Dispatcher.BeginInvoke(() => { FieldView.LineClear(line); });
+            }
             lineAnimTimer.Start();
         }
 
