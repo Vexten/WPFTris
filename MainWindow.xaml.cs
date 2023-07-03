@@ -7,9 +7,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using WPFTris.Game;
-using WPFTris.Helpers;
 using WPFTris.Base;
 using WPFTris.Graphics;
+using Microsoft.Win32;
+using System.Windows.Media.Imaging;
 
 namespace WPFTris
 {
@@ -17,33 +18,23 @@ namespace WPFTris
     /// Interaction logic for MainWindow.xaml
     /// </summary>
 
-    using Cell = Label;
-
     public partial class MainWindow : Window
     {
-        private const int displayCellSize = 50;
-
-        private delegate void SetLineColor(int line, Brush b);
+        private const int displayCellSize = 40;
 
         private readonly GameThreaded g;
         private readonly int w, h;
-        private readonly EasyGrid<Cell>[] pieceDisplays;
-        private readonly EasyGrid<Cell> easyField;
-        private readonly DispatcherTimer lineAnimTimer;
-        private readonly int baseAnimTicks;
-        private int animTicks;
-        private int[] lines;
+        private readonly FieldView[] pieceDisplays;
 
 #pragma warning disable CS8618
         public MainWindow()
         {
             InitializeComponent();
-            w = Field.ColumnDefinitions.Count;
-            h = Field.RowDefinitions.Count;
-            g = new GameThreaded(Field.ColumnDefinitions.Count, Field.RowDefinitions.Count);
+            w = FieldView.WidthInTiles;
+            h = FieldView.HeightInTiles;
+            g = new GameThreaded(w, h);
 
-            pieceDisplays = new EasyGrid<Cell>[Enum.GetNames(typeof(TetrominoeFactory.Pieces)).Length];
-            easyField = new EasyGrid<Cell>(Field);
+            pieceDisplays = new FieldView[Enum.GetNames(typeof(TetrominoeFactory.Pieces)).Length];
             _SetPieceDisplays();
             _DisplayNext(g.NextPiece.name);
 
@@ -52,12 +43,7 @@ namespace WPFTris
             g.PieceMove += _DrawFieldLocal;
             g.Redraw += () => { Dispatcher.BeginInvoke(_DrawField); };
             g.Loss += () => { Dispatcher.BeginInvoke(_DrawField); };
-
-            lineAnimTimer = new();
-            lineAnimTimer.Interval = TimeSpan.FromMilliseconds(20);
-            baseAnimTicks = 100;
-            animTicks = baseAnimTicks;
-            lineAnimTimer.Tick += _Animation;
+            FieldView.LineClearAnimCompleted += _Resume;
 
             LevelLabel.Content = $"Level: {g.Level}";
             ScoreLabel.Content = $"Score: {g.Score}";
@@ -68,19 +54,18 @@ namespace WPFTris
 
         private void _SetPieceDisplays()
         {
+            FieldView field = new();
+            field.TileSize = displayCellSize;
+            field.TileOverlay = @"img/tile_overlay.png";
+            field.BackgroundTile = @"img/tile_black.png";
             foreach (int piece in Enum.GetValues(typeof(TetrominoeFactory.Pieces)).Cast<int>())
             {
                 pieceDisplays[piece] = _CreatePieceDisplay(TetrominoeFactory.GetTetrominoe((TetrominoeFactory.Pieces)piece).shape);
             }
         }
 
-        private EasyGrid<Cell> _CreatePieceDisplay(Polyminoe piece)
+        private FieldView _CreatePieceDisplay(Polyminoe piece)
         {
-            Grid g = new();
-            g.RowDefinitions.Add(new RowDefinition());
-            g.ColumnDefinitions.Add(new ColumnDefinition());
-            g.Height = displayCellSize;
-            g.Width = displayCellSize;
             Point<int> topLeft = new(0,0);
             Point<int> bottomRight = new(0,0);
             foreach (var p in piece)
@@ -91,31 +76,32 @@ namespace WPFTris
                 else if (p.y > bottomRight.y) bottomRight.y = p.y;
             }
             topLeft = -topLeft;
-            bottomRight = topLeft + bottomRight;
-            for (int i = 0; i < bottomRight.x; i++)
+            bottomRight = topLeft + bottomRight + new Point<int>(1,1);
+            FieldView f = new();
+            f.TileSize = displayCellSize;
+            f.TileOverlay = @"img/tile_overlay.png";
+            f.BackgroundTile = @"img/tile_black.png";
+            f.WidthInTiles = bottomRight.x;
+            f.HeightInTiles = bottomRight.y;
+            Size s = new Size(f.Width, f.Height);
+            for (int x = 0; x < f.WidthInTiles; x++)
             {
-                g.ColumnDefinitions.Add(new ColumnDefinition());
-                g.Width += displayCellSize;
+                for (int y = 0; y < f.HeightInTiles; y++)
+                {
+                    f.TileBackground(x, y);
+                }
             }
-            for (int i = 0; i < bottomRight.y; i++)
-            {
-                g.RowDefinitions.Add(new RowDefinition());
-                g.Height += displayCellSize;
-            }
-            EasyGrid<Cell> ret = new(g);
             foreach (var p in piece)
             {
                 var pt = p + topLeft;
-                _SetCellBackground(pt.x, pt.y, Brushes.Black, ret);
+                f.TileBlock(pt.x, pt.y, Color.FromRgb(0, 0, 255));
             }
-            ret.Grid.HorizontalAlignment = HorizontalAlignment.Center;
-            ret.Grid.VerticalAlignment = VerticalAlignment.Center;
-            return ret;
+            return f;
         }
 
         private void _DisplayNext(TetrominoeFactory.Pieces p)
         {
-            NextPieceView.Child = pieceDisplays[(int)p].Grid;
+            NextPieceView.Child = pieceDisplays[(int)p];
         }
 
         private void _NewPiece()
@@ -128,7 +114,6 @@ namespace WPFTris
         private void _LineClear(int[] lines)
         {
             g.Pause();
-            this.lines = lines;
             Dispatcher.BeginInvoke(() => { LevelLabel.Content = $"Level: {g.Level}"; });
             Dispatcher.BeginInvoke(() => { ScoreLabel.Content = $"Score: {g.Score}"; });
             Dispatcher.BeginInvoke(() => { TotalLinesDisplay.Content = $"Lines: {g.TotalLines}"; });
@@ -136,35 +121,12 @@ namespace WPFTris
             {
                 Dispatcher.BeginInvoke(() => { FieldView.LineClear(line); });
             }
-            lineAnimTimer.Start();
         }
 
-        private void _Animation(object? sender, EventArgs e)
+        private void _Resume(object? sender, EventArgs e)
         {
-            if (animTicks < 1)
-            {
-                animTicks = baseAnimTicks;
-                lineAnimTimer.Stop();
-                g.QueueMove(GameThreaded.Move.Advance);
-                g.Resume();
-                return;
-            }
-            byte c = (byte)(255 - (255 * animTicks / baseAnimTicks));
-            SolidColorBrush b = new(Color.FromRgb(255, c, c));
-            foreach (var line in lines)
-            {
-                for (int x = 0; x < w; x++)
-                {
-                    _SetCellBackground(x, line, b, easyField);
-                }
-            }
-            animTicks--;
-        }
-
-        private void _SetCellBackground(int x, int y, Brush b, EasyGrid<Cell> g)
-        {
-            Cell l = g[x, y];
-            l.Background = b;
+            g.Resume();
+            _DrawField();
         }
 
         private void _DrawFieldIn(int x1, int y1, int x2, int y2)
@@ -176,15 +138,12 @@ namespace WPFTris
                     switch (g.FieldAt(x, y))
                     {
                         case Game.Game.FieldCleared:
-                            _SetCellBackground(x, y, Brushes.Red, easyField);
                             FieldView.TileBlock(x, y, Color.FromRgb(255,0,0));
                             break;
                         case Game.Game.FieldEmpty:
-                            _SetCellBackground(x, y, Brushes.White, easyField);
                             FieldView.TileBackground(x, y);
                             break;
                         default:
-                            _SetCellBackground(x, y, Brushes.Black, easyField);
                             FieldView.TileBlock(x, y, Color.FromRgb(0, 0, 255));
                             break;
                     }

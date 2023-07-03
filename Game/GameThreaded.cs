@@ -178,6 +178,7 @@ namespace WPFTris.Game
 
         public void Resume()
         {
+            g.Advance();
             m.Set();
         }
 

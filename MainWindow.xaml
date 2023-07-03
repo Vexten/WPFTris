@@ -14,11 +14,11 @@
         </Style>
     </Window.Resources>
     
-    <Grid Margin="30,30,30,30" Name="Main">
+    <Grid Margin="15" Name="Main">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0" Name="Stats">
@@ -26,58 +26,21 @@
                 <RowDefinition Height="2*"/>
                 <RowDefinition Height="8*"/>
             </Grid.RowDefinitions>
-
-            <controls:FieldView x:Name="FieldView" Grid.Row="1"
-                                TileSize="20" WidthInTiles="10" HeightInTiles="20"
-                                TileOverlay="img/tile_overlay.png" BackgroundTile="img/tile_background.png"
-                                LineClearFadeOut="5000"/>
         </Grid>
 
         <Grid Grid.Column="1" Name="Tetris">
             <Grid.RowDefinitions>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="9*"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Label Grid.Column="0" Name="TotalLinesDisplay"></Label>
             
             <Border Grid.Row="1" BorderBrush="Black" BorderThickness="2">
-                <Grid Name="Field">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                </Grid>
+                <controls:FieldView x:Name="FieldView" Grid.Row="1"
+                                TileSize="25" WidthInTiles="10" HeightInTiles="20"
+                                TileOverlay="img/tile_overlay.png" BackgroundTile="img/tile_background.png"
+                                LineClearFadeOut="1000"/>
             </Border>
         </Grid>
 
@@ -102,9 +65,10 @@
                 </Label>
             </Grid>
             
-            <Border Grid.Row="1" BorderBrush="Black" BorderThickness="2" Style="{StaticResource BaseSquare}">
-                <Viewbox Name="NextPieceView" Margin="20" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-
+            <Border Grid.Row="1" BorderBrush="Black" Background="Black" BorderThickness="2" Style="{StaticResource BaseSquare}">
+                <Viewbox Name="NextPieceView" Margin="0" Stretch="None" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <controls:FieldView TileSize="40" WidthInTiles="4" HeightInTiles="4"
+                                        TileOverlay="img/tile_overlay.png" BackgroundTile="img/tile_black.png"/>
                 </Viewbox>
             </Border>
         </Grid>

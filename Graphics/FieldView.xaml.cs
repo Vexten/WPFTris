@@ -169,6 +169,7 @@ namespace WPFTris.Graphics
             FieldView f = ((FieldView)d);
             f.HeightInTiles = (int)e.NewValue;
             f.Height = f.HeightInTiles * f.TileSize;
+            f.MinHeight = f.Height;
             f._ImGoingInsane();
         }
 
@@ -178,6 +179,7 @@ namespace WPFTris.Graphics
             FieldView f = ((FieldView)d);
             f.WidthInTiles = (int)e.NewValue;
             f.Width = f.WidthInTiles * f.TileSize;
+            f.MinWidth = f.Width;
             f._ImGoingInsane();
         }
 
@@ -188,6 +190,8 @@ namespace WPFTris.Graphics
             f.TileSize = (int)e.NewValue;
             f.Height = f.HeightInTiles * f.TileSize;
             f.Width = f.WidthInTiles * f.TileSize;
+            f.MinWidth = f.Width;
+            f.MinHeight = f.MinHeight;
             f._ImGoingInsane();
             f._SetBackground();
             f._ChangeAnimScale();

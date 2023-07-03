@@ -12,10 +12,14 @@
 
   <ItemGroup>
     <None Remove="img\tile_background.png" />
+    <None Remove="img\tile_black.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="img\tile_background.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="img\tile_black.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="img\tile_overlay.png">
