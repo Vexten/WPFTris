@@ -278,8 +278,7 @@ namespace WPFTris.Game
         public void Slam()
         {
             _SetPiece(FieldEmpty);
-            int ttop = _GetFilledHeight();
-            int top = currPoint.y < ttop ? currPoint.y : ttop;
+            int top = currPoint.y;
             for (int y = top + 1; y < h + 1; y++)
             {
                 currPoint.y = y;
