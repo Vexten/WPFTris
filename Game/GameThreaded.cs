@@ -37,7 +37,7 @@ namespace WPFTris.Game
                     if (moves.Count > 0)
                     {
                         Move last = moves.ElementAt(moves.Count - 1);
-                        if (last != Move.Slam || last != Move.Advance)
+                        if (last != Move.Slam && last != Move.Advance)
                         {
                             moves.Enqueue(Move.Advance);
                         }

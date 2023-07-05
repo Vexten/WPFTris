@@ -2,15 +2,14 @@
 using System.Linq;
 using System.Numerics;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using WPFTris.Game;
 using WPFTris.Base;
 using WPFTris.Graphics;
-using Microsoft.Win32;
-using System.Windows.Media.Imaging;
+using System.Xml.Linq;
+using System.Collections.Generic;
 
 namespace WPFTris
 {
@@ -21,12 +20,22 @@ namespace WPFTris
     public partial class MainWindow : Window
     {
         private const int displayCellSize = 40;
+        private static readonly Dictionary<TetrominoeFactory.Pieces, Color> pieceColor = new Dictionary<TetrominoeFactory.Pieces, Color>
+        {
+            [TetrominoeFactory.Pieces.I] = Colors.Red,
+            [TetrominoeFactory.Pieces.O] = Colors.Red,
+            [TetrominoeFactory.Pieces.T] = Colors.Red,
+            [TetrominoeFactory.Pieces.L] = Colors.Blue,
+            [TetrominoeFactory.Pieces.J] = Colors.Blue,
+            [TetrominoeFactory.Pieces.S] = Colors.Blue,
+            [TetrominoeFactory.Pieces.Z] = Colors.Blue,
+        };
 
         private readonly GameThreaded g;
         private readonly int w, h;
         private readonly FieldView[] pieceDisplays;
+        
 
-#pragma warning disable CS8618
         public MainWindow()
         {
             InitializeComponent();
@@ -50,7 +59,6 @@ namespace WPFTris
 
             g.Start();
         }
-#pragma warning restore CS8618
 
         private void _SetPieceDisplays()
         {
@@ -58,13 +66,13 @@ namespace WPFTris
             field.TileSize = displayCellSize;
             field.TileOverlay = @"img/tile_overlay.png";
             field.BackgroundTile = @"img/tile_black.png";
-            foreach (int piece in Enum.GetValues(typeof(TetrominoeFactory.Pieces)).Cast<int>())
+            foreach (var piece in Enum.GetValues(typeof(TetrominoeFactory.Pieces)).Cast<TetrominoeFactory.Pieces>())
             {
-                pieceDisplays[piece] = _CreatePieceDisplay(TetrominoeFactory.GetTetrominoe((TetrominoeFactory.Pieces)piece).shape);
+                pieceDisplays[(int)piece] = _CreatePieceDisplay(TetrominoeFactory.GetTetrominoe(piece).shape, piece);
             }
         }
 
-        private FieldView _CreatePieceDisplay(Polyminoe piece)
+        private FieldView _CreatePieceDisplay(Polyminoe piece, TetrominoeFactory.Pieces name)
         {
             Point<int> topLeft = new(0,0);
             Point<int> bottomRight = new(0,0);
@@ -94,7 +102,7 @@ namespace WPFTris
             foreach (var p in piece)
             {
                 var pt = p + topLeft;
-                f.TileBlock(pt.x, pt.y, Color.FromRgb(0, 0, 255));
+                f.TileBlock(pt.x, pt.y, pieceColor[name]);
             }
             return f;
         }
@@ -135,16 +143,17 @@ namespace WPFTris
             {
                 for (int y = y1; y < y2 + 1; y++)
                 {
-                    switch (g.FieldAt(x, y))
+                    int tVal = g.FieldAt(x, y);
+                    switch (tVal)
                     {
                         case Game.Game.FieldCleared:
-                            FieldView.TileBlock(x, y, Color.FromRgb(255,0,0));
+                            FieldView.TileBlock(x, y, Colors.White);
                             break;
                         case Game.Game.FieldEmpty:
                             FieldView.TileBackground(x, y);
                             break;
                         default:
-                            FieldView.TileBlock(x, y, Color.FromRgb(0, 0, 255));
+                            FieldView.TileBlock(x, y, pieceColor[(TetrominoeFactory.Pieces)tVal]);
                             break;
                     }
                 }
