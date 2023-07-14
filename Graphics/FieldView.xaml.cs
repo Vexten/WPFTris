@@ -154,12 +154,8 @@ namespace WPFTris.Graphics
                 }
             }
             f.TileOverlay = path;
-            if (f.tiles == null) return;
-            foreach (var t in f.tiles)
-            {
-                Image i = (Image)t.foreground;
-                i.Source = f.tileOverlay;
-            }
+            f.Field.Children.Clear();
+            f._CreateTiles(f.TileSize);
         }
 
         private static object _ClampToOne(DependencyObject d, object baseValue)
@@ -195,14 +191,9 @@ namespace WPFTris.Graphics
             f.Height = f.HeightInTiles * f.TileSize;
             f.Width = f.WidthInTiles * f.TileSize;
             f.MinWidth = f.Width;
-            f.MinHeight = f.Height;
-            // used to be f._ImGoingInsane(), which invalidated all tiles
-            f._ArrangeTiles(f.TileSize);
-            ImageBrush? fb = (ImageBrush)f.Field.Background;
-            if (fb != null)
-            {
-                fb.Viewport = new Rect(new Point(0, 0), new Point(f.TileSize, f.TileSize));
-            }
+            f.MinHeight = f.MinHeight;
+            f._ImGoingInsane();
+            f._SetBackground();
             f._ChangeAnimScale();
         }
         #endregion
@@ -335,7 +326,8 @@ namespace WPFTris.Graphics
             {
                 for (int y = 0; y < h; y++)
                 {
-                    
+                    int xc = x * tileSize;
+                    int yc = y * tileSize;
                     Image i = new Image
                     {
                         Source = tileOverlay,
@@ -343,6 +335,8 @@ namespace WPFTris.Graphics
                         Height = tileSize,
                     };
                     RenderOptions.SetBitmapScalingMode(i, BitmapScalingMode.NearestNeighbor);
+                    Canvas.SetLeft(i, xc);
+                    Canvas.SetTop(i, yc);
                     Canvas.SetZIndex(i, 1);
                     Rectangle r = new Rectangle
                     {
@@ -350,6 +344,8 @@ namespace WPFTris.Graphics
                         Height = tileSize,
                         Width = tileSize,
                     };
+                    Canvas.SetLeft(r, xc);
+                    Canvas.SetTop(r, yc);
                     Canvas.SetZIndex(r, 0);
                     Field.Children.Add(i);
                     tileFadeOut.Begin(i, true);
@@ -360,25 +356,6 @@ namespace WPFTris.Graphics
                     tileFadeOut.Pause(r);
                     r.Visibility = Visibility.Hidden;
                     tiles[x, y] = new Tile { foreground = i, background = r };
-                }
-            }
-            _ArrangeTiles(tileSize);
-        }
-
-        private void _ArrangeTiles(int tileSize)
-        {
-            for (int x = 0; x < w; x++)
-            {
-                for (int y = 0; y < h; y++)
-                {
-                    var i = tiles[x, y].foreground;
-                    var r = tiles[x, y].background;
-                    int xc = x * tileSize;
-                    int yc = y * tileSize;
-                    Canvas.SetLeft(i, xc);
-                    Canvas.SetTop(i, yc);
-                    Canvas.SetLeft(r, xc);
-                    Canvas.SetTop(r, yc);
                 }
             }
         }
