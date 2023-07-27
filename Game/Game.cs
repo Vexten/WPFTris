@@ -238,6 +238,11 @@ namespace WPFTris.Game
             return _FieldAt(x, y);
         }
 
+        public int GetPieceCount(TetrominoeFactory.Pieces piece)
+        {
+            return totalPieces[(int)piece];
+        }
+
         public void RotatePiece(Polyminoe.RotationDir dir)
         {
             if (!_CanManipulatePiece()) return;
@@ -317,6 +322,7 @@ namespace WPFTris.Game
                     _Init();
                     return;
                 }
+                totalPieces[(int)curr.name]++;
                 currPoint.Copy(basePoint);
                 curr = next;
                 next = factory.GetTetrominoe();

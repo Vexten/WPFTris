@@ -26,6 +26,14 @@
                 <RowDefinition Height="2*"/>
                 <RowDefinition Height="8*"/>
             </Grid.RowDefinitions>
+
+            <Grid Name="PieceStatGrid" Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                
+            </Grid>
         </Grid>
 
         <Grid Grid.Column="1" Name="Tetris">
@@ -67,8 +75,9 @@
             
             <Border Grid.Row="1" BorderBrush="Black" Background="Black" BorderThickness="2" Style="{StaticResource BaseSquare}">
                 <Viewbox Name="NextPieceView" Margin="0" Stretch="None" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <controls:FieldView TileSize="40" WidthInTiles="4" HeightInTiles="4"
-                                        TileOverlay="img/tile_overlay.png" BackgroundTile="img/tile_black.png"/>
+                    <controls:FieldView x:Name="MarkupPieceDisplay"
+                        TileSize="40" WidthInTiles="4" HeightInTiles="4"
+                        TileOverlay="img/tile_overlay.png" BackgroundTile="img/tile_black.png"/>
                 </Viewbox>
             </Border>
         </Grid>

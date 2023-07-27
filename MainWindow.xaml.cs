@@ -8,8 +8,9 @@ using System.Windows.Threading;
 using WPFTris.Game;
 using WPFTris.Base;
 using WPFTris.Graphics;
-using System.Xml.Linq;
 using System.Collections.Generic;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace WPFTris
 {
@@ -19,7 +20,6 @@ namespace WPFTris
 
     public partial class MainWindow : Window
     {
-        private const int displayCellSize = 40;
         private static readonly Dictionary<TetrominoeFactory.Pieces, Color> pieceColor = new Dictionary<TetrominoeFactory.Pieces, Color>
         {
             [TetrominoeFactory.Pieces.I] = Colors.Red,
@@ -33,8 +33,14 @@ namespace WPFTris
 
         private readonly GameThreaded g;
         private readonly int w, h;
-        private readonly FieldView[] pieceDisplays;
-        
+        private readonly Label[] pieceCount;
+        private readonly PieceImage[] pieceDisplays;
+
+        private struct PieceImage
+        {
+            public Image Big;
+            public Image Small;
+        }
 
         public MainWindow()
         {
@@ -43,9 +49,11 @@ namespace WPFTris
             h = FieldView.HeightInTiles;
             g = new GameThreaded(w, h);
 
-            pieceDisplays = new FieldView[Enum.GetNames(typeof(TetrominoeFactory.Pieces)).Length];
+            pieceDisplays = new PieceImage[pieceColor.Keys.Count];
             _SetPieceDisplays();
             _DisplayNext(g.NextPiece.name);
+            pieceCount = new Label[pieceColor.Keys.Count];
+            _FillPieceStats();
 
             g.PieceDrop += _NewPiece;
             g.LineClear += _LineClear;
@@ -60,19 +68,42 @@ namespace WPFTris
             g.Start();
         }
 
+        private void _FillPieceStats()
+        {
+            int i = 0;
+            foreach (var piece in pieceColor.Keys)
+            {
+                int pInt = (int)piece;
+                PieceStatGrid.RowDefinitions.Add(new RowDefinition());
+                pieceCount[pInt] = new Label
+                {
+                    Content = "0",
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalContentAlignment = HorizontalAlignment.Center,
+                    VerticalContentAlignment = VerticalAlignment.Center,
+                };
+                pieceDisplays[pInt].Small.HorizontalAlignment = HorizontalAlignment.Center;
+                pieceDisplays[pInt].Small.VerticalAlignment = VerticalAlignment.Center;
+                Grid.SetRow(pieceCount[pInt], i);
+                Grid.SetRow(pieceDisplays[pInt].Small, i);
+                Grid.SetColumn(pieceCount[pInt], 1);
+                Grid.SetColumn(pieceDisplays[pInt].Small, 0);
+                PieceStatGrid.Children.Add(pieceCount[pInt]);
+                PieceStatGrid.Children.Add(pieceDisplays[pInt].Small);
+                i++;
+            }
+        }
+
         private void _SetPieceDisplays()
         {
-            FieldView field = new();
-            field.TileSize = displayCellSize;
-            field.TileOverlay = @"img/tile_overlay.png";
-            field.BackgroundTile = @"img/tile_black.png";
-            foreach (var piece in Enum.GetValues(typeof(TetrominoeFactory.Pieces)).Cast<TetrominoeFactory.Pieces>())
+            foreach (var piece in pieceColor.Keys)
             {
                 pieceDisplays[(int)piece] = _CreatePieceDisplay(TetrominoeFactory.GetTetrominoe(piece).shape, piece);
             }
         }
 
-        private FieldView _CreatePieceDisplay(Polyminoe piece, TetrominoeFactory.Pieces name)
+        private PieceImage _CreatePieceDisplay(Polyminoe piece, TetrominoeFactory.Pieces name)
         {
             Point<int> topLeft = new(0,0);
             Point<int> bottomRight = new(0,0);
@@ -86,30 +117,53 @@ namespace WPFTris
             topLeft = -topLeft;
             bottomRight = topLeft + bottomRight + new Point<int>(1,1);
             FieldView f = new();
-            f.TileSize = displayCellSize;
+            f.TileSize = MarkupPieceDisplay.TileSize;
             f.TileOverlay = @"img/tile_overlay.png";
-            f.BackgroundTile = @"img/tile_black.png";
+            f.BackgroundTile = @"img/tile_transparent.png";
             f.WidthInTiles = bottomRight.x;
             f.HeightInTiles = bottomRight.y;
-            Size s = new Size(f.Width, f.Height);
-            for (int x = 0; x < f.WidthInTiles; x++)
-            {
-                for (int y = 0; y < f.HeightInTiles; y++)
-                {
-                    f.TileBackground(x, y);
-                }
-            }
             foreach (var p in piece)
             {
                 var pt = p + topLeft;
                 f.TileBlock(pt.x, pt.y, pieceColor[name]);
             }
-            return f;
+            PieceImage ret = new PieceImage();
+            Size s = new Size(f.Width, f.Height);
+            f.Measure(s);
+            f.Arrange(new Rect(s));
+            RenderTargetBitmap rt = new((int)f.Width,
+                (int)f.Height,
+                96,
+                96,
+                PixelFormats.Pbgra32);
+            rt.Render(f);
+            ret.Big = new Image
+            {
+                Source = rt,
+                Width = f.Width,
+                Height = f.Height,
+            };
+            RenderOptions.SetBitmapScalingMode(ret.Big, BitmapScalingMode.NearestNeighbor);
+            double scale = (double)FieldView.TileSize / MarkupPieceDisplay.TileSize;
+            rt = new((int)(f.Width * scale),
+                (int)(f.Height * scale),
+                (int)(96.0 * scale),
+                (int)(96.0 * scale),
+                PixelFormats.Pbgra32);
+            rt.Render(f);
+            ret.Small = new Image
+            {
+                Source = rt,
+                Width = f.Width * scale,
+                Height = f.Height * scale,
+            };
+            RenderOptions.SetBitmapScalingMode(ret.Small, BitmapScalingMode.NearestNeighbor);
+            return ret;
         }
 
         private void _DisplayNext(TetrominoeFactory.Pieces p)
         {
-            NextPieceView.Child = pieceDisplays[(int)p];
+            NextPieceView.Child = pieceDisplays[(int)p].Big;
         }
 
         private void _NewPiece()
@@ -117,6 +171,13 @@ namespace WPFTris
             Dispatcher.BeginInvoke(_DrawField);
             Dispatcher.BeginInvoke(_DisplayNext, g.NextPiece.name);
             Dispatcher.BeginInvoke(() => { ScoreLabel.Content = $"Score: {g.Score}"; });
+            Dispatcher.BeginInvoke(() =>
+            {
+                foreach (var piece in pieceColor.Keys)
+                {
+                    pieceCount[(int)piece].Content = g.GetPieceCount(piece).ToString();
+                }
+            });
         }
 
         private void _LineClear(int[] lines)

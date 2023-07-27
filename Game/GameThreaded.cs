@@ -143,10 +143,9 @@ namespace WPFTris.Game
 
         public int TotalLines => g.TotalLines;
 
-        public int FieldAt(int x, int y)
-        {
-            return g.FieldAt(x, y);
-        }
+        public int FieldAt(int x, int y) => g.FieldAt(x, y);
+
+        public int GetPieceCount(TetrominoeFactory.Pieces piece) => g.GetPieceCount(piece);
         #endregion
 
         public GameThreaded(int w, int h)
