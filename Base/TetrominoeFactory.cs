@@ -13,7 +13,7 @@ namespace WPFTris.Base
             public const int Z = 4;
             public const int J = 5;
             public const int L = 6;
-            private static readonly Polyminoe.State[] IShape =
+            protected static readonly Polyminoe.State[] IShape =
             {
                 new Polyminoe.State(new Point<int>[]
                 {
@@ -24,14 +24,14 @@ namespace WPFTris.Base
                     new Point<int>(0,1), new Point<int>(0,0), new Point<int>(0,-1), new Point<int>(0,-2)
                 }),
             };
-            private static readonly Polyminoe.State[] OShape =
+            protected static readonly Polyminoe.State[] OShape =
             {
                 new Polyminoe.State(new Point<int>[]
                 {
                     new Point<int>(-1,-1), new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(0,-1)
                 })
             };
-            private static readonly Polyminoe.State[] TShape =
+            protected static readonly Polyminoe.State[] TShape =
             {
                 new Polyminoe.State(new Point<int>[]
                 {
@@ -50,7 +50,7 @@ namespace WPFTris.Base
                     new Point<int>(0,0), new Point<int>(-1,0), new Point<int>(0,1), new Point<int>(0,-1)
                 }),
             };
-            private static readonly Polyminoe.State[] SShape =
+            protected static readonly Polyminoe.State[] SShape =
             {
                 new Polyminoe.State(new Point<int>[]
                 {
@@ -61,7 +61,7 @@ namespace WPFTris.Base
                     new Point<int>(0,-1), new Point<int>(0,0), new Point<int>(1,0), new Point<int>(1,1)
                 }),
             };
-            private static readonly Polyminoe.State[] ZShape =
+            protected static readonly Polyminoe.State[] ZShape =
             {
                 new Polyminoe.State(new Point<int>[]
                 {
@@ -72,7 +72,7 @@ namespace WPFTris.Base
                     new Point<int>(1,-1), new Point<int>(1,0), new Point<int>(0,0), new Point<int>(0,1)
                 }),
             };
-            private static readonly Polyminoe.State[] JShape =
+            protected static readonly Polyminoe.State[] JShape =
             {
                 new Polyminoe.State(new Point<int>[]
                 {
@@ -91,7 +91,7 @@ namespace WPFTris.Base
                     new Point<int>(0,-1), new Point<int>(0,0), new Point<int>(0,1), new Point<int>(-1,1)
                 }),
             };
-            private static readonly Polyminoe.State[] LShape =
+            protected static readonly Polyminoe.State[] LShape =
             {
                 new Polyminoe.State(new Point<int>[]
                 {

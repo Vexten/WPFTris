@@ -9,16 +9,27 @@ using System.Threading.Tasks;
 
 namespace WPFTris.Base
 {
+    /// <summary>
+    /// Implements basic polyminoe factory functionality<para/>
+    /// To implement correctly, define a public <see cref="Pieces"/> subclass and use <c>_InitPiecesObject</c> to assign it to <c>this.p</c>
+    /// </summary>
     internal abstract class PolyminoeFactory
     {
+        protected static readonly string ShapeIdentifier = "Shape";
+
         private readonly Random rnd;
         private int last;
         private Dictionary<int, Polyminoe.State[]> polyminoes;
         protected Pieces p;
 
-        /*
-         * Should only contain const int and protected static readonly Polyminoe.State[]
-         */
+        /// <summary>
+        /// Marker class for piece definitions<para/>
+        /// Piece definition format:
+        /// <code>
+        /// public const int %NAME% = ...;
+        /// private static readonly Polyminoe.State[] %NAME% + <see cref="ShapeIdentifier"/> = ...;
+        /// </code>
+        /// </summary>
         public abstract class Pieces { }
 
         public readonly struct Piece
@@ -55,7 +66,8 @@ namespace WPFTris.Base
                 }
                 else
                 {
-                    states[fi.Name[0].ToString()] = (Polyminoe.State[])fi.GetValue(null);
+                    int i = fi.Name.IndexOf(ShapeIdentifier);
+                    states[fi.Name.Remove(i,fi.Name.Length)] = (Polyminoe.State[])fi.GetValue(null);
                 }
             }
             foreach (var kvp in names)
