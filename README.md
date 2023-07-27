@@ -15,4 +15,4 @@ Study project
 
 ## Current Look
 
-There will be an image of WPFTris in it's current state
+![A screenshot of WPFTris in Debug mode](/repo_files/tetris_screenshot.png)
