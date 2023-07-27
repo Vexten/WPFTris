@@ -67,7 +67,7 @@ namespace WPFTris.Base
                 else
                 {
                     int i = fi.Name.IndexOf(ShapeIdentifier);
-                    states[fi.Name.Remove(i,fi.Name.Length)] = (Polyminoe.State[])fi.GetValue(null);
+                    states[fi.Name.Remove(i,ShapeIdentifier.Length)] = (Polyminoe.State[])fi.GetValue(null);
                 }
             }
             foreach (var kvp in names)
