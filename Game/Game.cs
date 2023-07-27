@@ -13,7 +13,7 @@ namespace WPFTris.Game
 
         private static readonly int[] scoring = { 40, 100, 300, 1200 };
         private readonly TetrominoeFactory factory;
-        private TetrominoeFactory.Tetrominoe curr, next;
+        private PolyminoeFactory.Piece curr, next;
         private readonly int w, h;
         private readonly int[,] field;
         private Point<int> basePoint;
@@ -48,8 +48,8 @@ namespace WPFTris.Game
             totalLines = 0;
             Array.Clear(totalPieces, 0, totalPieces.Length);
             currPoint = new Point<int>(basePoint);
-            curr = factory.GetTetrominoe();
-            next = factory.GetTetrominoe();
+            curr = factory.GetPiece();
+            next = factory.GetPiece();
             linesWereCleared = false;
             clearedLines.Clear();
         }
@@ -61,7 +61,7 @@ namespace WPFTris.Game
 
         private bool _IsBlock(int x, int y)
         {
-            return Enum.IsDefined((TetrominoeFactory.Pieces)_FieldAt(x, y));
+            return factory.PieceExists(_FieldAt(x, y));
         }
 
         private int _GetFilledHeight()
@@ -190,7 +190,7 @@ namespace WPFTris.Game
         }
         #endregion
 
-        public TetrominoeFactory.Tetrominoe NextPiece => next;
+        public PolyminoeFactory.Piece NextPiece => next;
 
         public Point<int> CurrentPoint => new(currPoint);
 
@@ -229,7 +229,7 @@ namespace WPFTris.Game
             field = new int[w, h + FieldAdditionalSpace];
             basePoint = new Point<int>(w / 2, -1);
             clearedLines = new Stack<int>();
-            totalPieces = new int[Enum.GetNames(typeof(TetrominoeFactory.Pieces)).Length];
+            totalPieces = new int[factory.GetPieces().Length];
             _Init();
         }
 
@@ -238,9 +238,9 @@ namespace WPFTris.Game
             return _FieldAt(x, y);
         }
 
-        public int GetPieceCount(TetrominoeFactory.Pieces piece)
+        public int GetPieceCount(int piece)
         {
-            return totalPieces[(int)piece];
+            return totalPieces[piece];
         }
 
         public void RotatePiece(Polyminoe.RotationDir dir)
@@ -324,7 +324,7 @@ namespace WPFTris.Game
                 totalPieces[(int)curr.name]++;
                 currPoint.Copy(basePoint);
                 curr = next;
-                next = factory.GetTetrominoe();
+                next = factory.GetPiece();
                 PieceDrop?.Invoke();
                 if (linesWereCleared) LineClear?.Invoke(clearedLines.ToArray());
             }

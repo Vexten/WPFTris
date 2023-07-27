@@ -2,161 +2,123 @@
 
 namespace WPFTris.Base
 {
-    internal class TetrominoeFactory
-    {
-        private static readonly Polyminoe.State[] I =
+    internal class TetrominoeFactory : PolyminoeFactory
+    {    
+        public class Tetrominoes : Pieces
         {
-            new Polyminoe.State(new Point<int>[]
+            public const int I = 0;
+            public const int O = 1;
+            public const int T = 2;
+            public const int S = 3;
+            public const int Z = 4;
+            public const int J = 5;
+            public const int L = 6;
+            private static readonly Polyminoe.State[] IShape =
             {
-                new Point<int>(-2,0), new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(1,0)
-            }),
-            new Polyminoe.State(new Point<int>[]
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(-2,0), new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(1,0)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(0,1), new Point<int>(0,0), new Point<int>(0,-1), new Point<int>(0,-2)
+                }),
+            };
+            private static readonly Polyminoe.State[] OShape =
             {
-                new Point<int>(0,1), new Point<int>(0,0), new Point<int>(0,-1), new Point<int>(0,-2)
-            }),
-        };
-        private static readonly Polyminoe.State[] O =
-        {
-            new Polyminoe.State(new Point<int>[]
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(-1,-1), new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(0,-1)
+                })
+            };
+            private static readonly Polyminoe.State[] TShape =
             {
-                new Point<int>(-1,-1), new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(0,-1)
-            })
-        };
-        private static readonly Polyminoe.State[] T =
-        {
-            new Polyminoe.State(new Point<int>[]
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(0,0), new Point<int>(1,0), new Point<int>(0,-1), new Point<int>(-1,0)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(0,0), new Point<int>(0,1), new Point<int>(0,-1), new Point<int>(1,0)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(0,1), new Point<int>(1,0), new Point<int>(0,0), new Point<int>(-1,0)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(0,0), new Point<int>(-1,0), new Point<int>(0,1), new Point<int>(0,-1)
+                }),
+            };
+            private static readonly Polyminoe.State[] SShape =
             {
-                new Point<int>(0,0), new Point<int>(1,0), new Point<int>(0,-1), new Point<int>(-1,0)
-            }),
-            new Polyminoe.State(new Point<int>[]
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(1,0), new Point<int>(0,0), new Point<int>(0,1), new Point<int>(-1,1)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(0,-1), new Point<int>(0,0), new Point<int>(1,0), new Point<int>(1,1)
+                }),
+            };
+            private static readonly Polyminoe.State[] ZShape =
             {
-                new Point<int>(0,0), new Point<int>(0,1), new Point<int>(0,-1), new Point<int>(1,0)
-            }),
-            new Polyminoe.State(new Point<int>[]
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(0,1), new Point<int>(1,1)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(1,-1), new Point<int>(1,0), new Point<int>(0,0), new Point<int>(0,1)
+                }),
+            };
+            private static readonly Polyminoe.State[] JShape =
             {
-                new Point<int>(0,1), new Point<int>(1,0), new Point<int>(0,0), new Point<int>(-1,0)
-            }),
-            new Polyminoe.State(new Point<int>[]
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(1,0), new Point<int>(0,0), new Point<int>(-1,0), new Point<int>(-1,-1)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(0,1), new Point<int>(0,0), new Point<int>(0,-1), new Point<int>(1,-1)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(1,0), new Point<int>(1,1)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(0,-1), new Point<int>(0,0), new Point<int>(0,1), new Point<int>(-1,1)
+                }),
+            };
+            private static readonly Polyminoe.State[] LShape =
             {
-                new Point<int>(0,0), new Point<int>(-1,0), new Point<int>(0,1), new Point<int>(0,-1)
-            }),
-        };
-        private static readonly Polyminoe.State[] S =
-        {
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(1,0), new Point<int>(0,0), new Point<int>(0,1), new Point<int>(-1,1)
-            }),
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(0,-1), new Point<int>(0,0), new Point<int>(1,0), new Point<int>(1,1)
-            }),
-        };
-        private static readonly Polyminoe.State[] Z =
-        {
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(0,1), new Point<int>(1,1)
-            }),
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(1,-1), new Point<int>(1,0), new Point<int>(0,0), new Point<int>(0,1)
-            }),
-        };
-        private static readonly Polyminoe.State[] J =
-        {
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(1,0), new Point<int>(0,0), new Point<int>(-1,0), new Point<int>(-1,-1)
-            }),
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(0,1), new Point<int>(0,0), new Point<int>(0,-1), new Point<int>(1,-1)
-            }),
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(1,0), new Point<int>(1,1)
-            }),
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(0,-1), new Point<int>(0,0), new Point<int>(0,1), new Point<int>(-1,1)
-            }),
-        };
-        private static readonly Polyminoe.State[] L =
-        {
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(1,-1), new Point<int>(1,0), new Point<int>(0,0), new Point<int>(-1,0)
-            }),
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(1,1), new Point<int>(0,1), new Point<int>(0,0), new Point<int>(0,-1)
-            }),
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(-1,1), new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(1,0)
-            }),
-            new Polyminoe.State(new Point<int>[]
-            {
-                new Point<int>(-1,-1), new Point<int>(0,-1), new Point<int>(0,0), new Point<int>(0,1)
-            }),
-        };
-        private static readonly Polyminoe.State[][] tetrominoes = { I, O, T, S, Z, L, J };
-        private static readonly int tetrominoe_count = tetrominoes.Length;
-
-        private readonly Random rnd;
-        private int last;
-
-        public readonly struct Tetrominoe
-        {
-            public readonly Polyminoe shape;
-            public readonly Pieces name;
-
-            public Tetrominoe(Polyminoe shape, Pieces name)
-            {
-                this.shape = shape;
-                this.name = name;
-            }
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(1,-1), new Point<int>(1,0), new Point<int>(0,0), new Point<int>(-1,0)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(1,1), new Point<int>(0,1), new Point<int>(0,0), new Point<int>(0,-1)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(-1,1), new Point<int>(-1,0), new Point<int>(0,0), new Point<int>(1,0)
+                }),
+                new Polyminoe.State(new Point<int>[]
+                {
+                    new Point<int>(-1,-1), new Point<int>(0,-1), new Point<int>(0,0), new Point<int>(0,1)
+                }),
+            };
         }
 
-        private int Roll()
+        protected override void _InitPiecesObject()
         {
-            int c = rnd.Next(tetrominoe_count);
-            if (last == c) c = rnd.Next(tetrominoe_count);
-            last = c;
-            return c;
+            p = new Tetrominoes();
         }
 
-        public enum Pieces
-        {
-            I = 0,
-            O,
-            T,
-            S,
-            Z,
-            L,
-            J
-        }
+        public TetrominoeFactory(int seed) : base(seed) { }
 
-        public TetrominoeFactory(int seed)
-        {
-            rnd = new Random(seed);
-        }
-
-        public TetrominoeFactory()
-        {
-            rnd = new Random();
-        }
-
-        public Tetrominoe GetTetrominoe()
-        {
-            int roll = Roll();
-            return new Tetrominoe(new Polyminoe(ref tetrominoes[roll]), (Pieces)roll);
-        }
-
-        public static Tetrominoe GetTetrominoe(Pieces piece)
-        {
-            return new Tetrominoe(new Polyminoe(ref tetrominoes[(int)piece]), piece);
-        }
+        public TetrominoeFactory() : base() { }
     }
 }

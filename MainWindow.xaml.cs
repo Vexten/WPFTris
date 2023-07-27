@@ -20,15 +20,15 @@ namespace WPFTris
 
     public partial class MainWindow : Window
     {
-        private static readonly Dictionary<TetrominoeFactory.Pieces, Color> pieceColor = new Dictionary<TetrominoeFactory.Pieces, Color>
+        private static readonly Dictionary<int, Color> pieceColor = new Dictionary<int, Color>
         {
-            [TetrominoeFactory.Pieces.I] = Colors.Red,
-            [TetrominoeFactory.Pieces.O] = Colors.Red,
-            [TetrominoeFactory.Pieces.T] = Colors.Red,
-            [TetrominoeFactory.Pieces.L] = Colors.Blue,
-            [TetrominoeFactory.Pieces.J] = Colors.Blue,
-            [TetrominoeFactory.Pieces.S] = Colors.Blue,
-            [TetrominoeFactory.Pieces.Z] = Colors.Blue,
+            [TetrominoeFactory.Tetrominoes.I] = Colors.Red,
+            [TetrominoeFactory.Tetrominoes.O] = Colors.Red,
+            [TetrominoeFactory.Tetrominoes.T] = Colors.Red,
+            [TetrominoeFactory.Tetrominoes.L] = Colors.Blue,
+            [TetrominoeFactory.Tetrominoes.J] = Colors.Blue,
+            [TetrominoeFactory.Tetrominoes.S] = Colors.Blue,
+            [TetrominoeFactory.Tetrominoes.Z] = Colors.Blue,
         };
 
         private readonly GameThreaded g;
@@ -97,13 +97,14 @@ namespace WPFTris
 
         private void _SetPieceDisplays()
         {
+            TetrominoeFactory f = new TetrominoeFactory();
             foreach (var piece in pieceColor.Keys)
             {
-                pieceDisplays[(int)piece] = _CreatePieceDisplay(TetrominoeFactory.GetTetrominoe(piece).shape, piece);
+                pieceDisplays[(int)piece] = _CreatePieceDisplay(f.GetPiece(piece).shape, piece);
             }
         }
 
-        private PieceImage _CreatePieceDisplay(Polyminoe piece, TetrominoeFactory.Pieces name)
+        private PieceImage _CreatePieceDisplay(Polyminoe piece, int name)
         {
             Point<int> topLeft = new(0,0);
             Point<int> bottomRight = new(0,0);
@@ -161,9 +162,9 @@ namespace WPFTris
             return ret;
         }
 
-        private void _DisplayNext(TetrominoeFactory.Pieces p)
+        private void _DisplayNext(int p)
         {
-            NextPieceView.Child = pieceDisplays[(int)p].Big;
+            NextPieceView.Child = pieceDisplays[p].Big;
         }
 
         private void _NewPiece()
@@ -214,7 +215,7 @@ namespace WPFTris
                             FieldView.TileBackground(x, y);
                             break;
                         default:
-                            FieldView.TileBlock(x, y, pieceColor[(TetrominoeFactory.Pieces)tVal]);
+                            FieldView.TileBlock(x, y, pieceColor[tVal]);
                             break;
                     }
                 }

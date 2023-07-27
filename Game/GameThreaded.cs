@@ -133,7 +133,7 @@ namespace WPFTris.Game
             remove { g.Redraw -= value; }
         }
 
-        public TetrominoeFactory.Tetrominoe NextPiece => g.NextPiece;
+        public PolyminoeFactory.Piece NextPiece => g.NextPiece;
 
         public Point<int> CurrentPoint => g.CurrentPoint;
 
@@ -145,7 +145,7 @@ namespace WPFTris.Game
 
         public int FieldAt(int x, int y) => g.FieldAt(x, y);
 
-        public int GetPieceCount(TetrominoeFactory.Pieces piece) => g.GetPieceCount(piece);
+        public int GetPieceCount(int piece) => g.GetPieceCount(piece);
         #endregion
 
         public GameThreaded(int w, int h)
