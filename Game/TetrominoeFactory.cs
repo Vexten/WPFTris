@@ -1,9 +1,10 @@
 ﻿using System;
+using WPFTris.Base;
 
-namespace WPFTris.Base
+namespace WPFTris.Game
 {
     internal class TetrominoeFactory : PolyminoeFactory
-    {    
+    {
         public class Tetrominoes : Pieces
         {
             public const int I = 0;

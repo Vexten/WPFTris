@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
-using static System.Net.Mime.MediaTypeNames;
-using WPFTris.Base;
+﻿using WPFTris.Game;
 
-namespace WPFTris.Game
+namespace WPFTris.Base
 {
 
     internal interface ITetris
     {
-        /*
-        public TetrominoeFactory.Tetrominoe NextPiece
+
+        public PolyminoeFactory.Piece NextPiece
         {
             get;
         }
@@ -43,11 +36,20 @@ namespace WPFTris.Game
 
         public delegate void PieceDropHandler(ITetris sender, TetrominoeFactory);
 
-        public enum MovementDir
+        public enum Move
         {
             Left,
-            Right
+            Right,
+            RotateLeft,
+            RotateRight,
+            SoftDrop,
+            HardDrop
         }
-        */
+
+        public void DoMove(Move move);
+
+        public void FieldAt(int x, int y);
+
+        public int GetPieceCount(int piece);
     }
 }
