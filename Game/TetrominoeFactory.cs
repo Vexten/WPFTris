@@ -14,6 +14,8 @@ namespace WPFTris.Game
             public const int Z = 4;
             public const int J = 5;
             public const int L = 6;
+
+            #region shape_definitions
             protected static readonly Polyminoe.State[] IShape =
             {
                 new Polyminoe.State(new Point<int>[]
@@ -111,6 +113,7 @@ namespace WPFTris.Game
                     new Point<int>(-1,-1), new Point<int>(0,-1), new Point<int>(0,0), new Point<int>(0,1)
                 }),
             };
+            #endregion
         }
 
         protected override void _InitPiecesObject()

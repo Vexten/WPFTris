@@ -4,7 +4,7 @@ using WPFTris.Base;
 
 namespace WPFTris.Game
 {
-    internal class Game
+    internal class Game : ITetris
     {
         public const int FieldEmpty = -1;
         public const int FieldCleared = -2;
@@ -200,20 +200,10 @@ namespace WPFTris.Game
 
         public int TotalLines => totalLines;
 
-        public delegate void RedrawHandler();
-        public event RedrawHandler? Redraw;
-
-        public delegate void LineClearHandler(int[] lines);
-        public event LineClearHandler? LineClear;
-
-        public delegate void PieceDropHandler();
-        public event PieceDropHandler? PieceDrop;
-
-        public delegate void PieceMoveHandler();
-        public event PieceMoveHandler? PieceMove;
-
-        public delegate void LossHandler();
-        public event LossHandler? Loss;
+        public event ITetris.LineClearHandler? LineClear;
+        public event ITetris.PieceDropHandler? PieceDrop;
+        public event ITetris.BasicHandler? PieceMove;
+        public event ITetris.BasicHandler? Loss;
 
         public enum MovementDir
         {
@@ -258,7 +248,7 @@ namespace WPFTris.Game
                 changed = false;
             }
             _SetPiece((int)curr.name);
-            if (changed) PieceMove?.Invoke();
+            if (changed) PieceMove?.Invoke(this);
         }
 
         public void MovePiece(MovementDir dir)
@@ -277,10 +267,10 @@ namespace WPFTris.Game
                 if (_PieceCollides()) currPoint.x -= 1;
             }
             _SetPiece((int)curr.name);
-            if (currPoint.x != ox) PieceMove?.Invoke();
+            if (currPoint.x != ox) PieceMove?.Invoke(this);
         }
 
-        public void Slam()
+        public void HardDrop()
         {
             _SetPiece(FieldEmpty);
             int top = currPoint.y;
@@ -303,7 +293,6 @@ namespace WPFTris.Game
                 _ClearField();
                 _DropBlocks();
                 linesWereCleared = false;
-                Redraw?.Invoke();
             }
             _SetPiece(FieldEmpty);
             currPoint.y += 1;
@@ -317,7 +306,7 @@ namespace WPFTris.Game
                 linesWereCleared = _CheckLines();
                 if (_CheckLoss())
                 {
-                    Loss?.Invoke();
+                    Loss?.Invoke(this);
                     _Init();
                     return;
                 }
@@ -325,12 +314,37 @@ namespace WPFTris.Game
                 currPoint.Copy(basePoint);
                 curr = next;
                 next = factory.GetPiece();
-                PieceDrop?.Invoke();
-                if (linesWereCleared) LineClear?.Invoke(clearedLines.ToArray());
+                PieceDrop?.Invoke(this, curr);
+                if (linesWereCleared) LineClear?.Invoke(this, clearedLines.ToArray());
             }
             else
             {
-                PieceMove?.Invoke();
+                PieceMove?.Invoke(this);
+            }
+        }
+
+        public void DoMove(ITetris.Move move)
+        {
+            switch (move)
+            {
+                case ITetris.Move.Left:
+                    MovePiece(MovementDir.Left);
+                    break;
+                case ITetris.Move.Right:
+                    MovePiece(MovementDir.Right);
+                    break;
+                case ITetris.Move.RotateLeft:
+                    RotatePiece(Polyminoe.RotationDir.Left);
+                    break;
+                case ITetris.Move.RotateRight:
+                    RotatePiece(Polyminoe.RotationDir.Right);
+                    break;
+                case ITetris.Move.SoftDrop:
+                    Advance();
+                    break;
+                case ITetris.Move.HardDrop:
+                    HardDrop();
+                    break;
             }
         }
     }

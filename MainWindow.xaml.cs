@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using WPFTris.Game;
 using WPFTris.Base;
-using WPFTris.Graphics;
+using WPFTris.UserInteraction;
 using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -58,8 +58,7 @@ namespace WPFTris
             g.PieceDrop += _NewPiece;
             g.LineClear += _LineClear;
             g.PieceMove += _DrawFieldLocal;
-            g.Redraw += () => { Dispatcher.BeginInvoke(_DrawField); };
-            g.Loss += () => { Dispatcher.BeginInvoke(_DrawField); };
+            g.Loss += (ITetris t) => { Dispatcher.BeginInvoke(_DrawField); };
             FieldView.LineClearAnimCompleted += _Resume;
 
             LevelLabel.Content = $"Level: {g.Level}";
@@ -167,21 +166,15 @@ namespace WPFTris
             NextPieceView.Child = pieceDisplays[p].Big;
         }
 
-        private void _NewPiece()
+        private void _NewPiece(ITetris t, PolyminoeFactory.Piece p)
         {
             Dispatcher.BeginInvoke(_DrawField);
             Dispatcher.BeginInvoke(_DisplayNext, g.NextPiece.name);
             Dispatcher.BeginInvoke(() => { ScoreLabel.Content = $"Score: {g.Score}"; });
-            Dispatcher.BeginInvoke(() =>
-            {
-                foreach (var piece in pieceColor.Keys)
-                {
-                    pieceCount[(int)piece].Content = g.GetPieceCount(piece).ToString();
-                }
-            });
+            Dispatcher.BeginInvoke(() => { pieceCount[p.name].Content = g.GetPieceCount(p.name).ToString(); });
         }
 
-        private void _LineClear(int[] lines)
+        private void _LineClear(ITetris t, int[] lines)
         {
             g.Pause();
             Dispatcher.BeginInvoke(() => { LevelLabel.Content = $"Level: {g.Level}"; });
@@ -227,7 +220,7 @@ namespace WPFTris
             _DrawFieldIn(0, 0, w - 1, h - 1);
         }
 
-        private void _DrawFieldLocal()
+        private void _DrawFieldLocal(ITetris t)
         {
             Point<int> p = g.CurrentPoint;
             Dispatcher.BeginInvoke(_DrawFieldIn,
@@ -254,22 +247,22 @@ namespace WPFTris
             switch (e.Key)
             {
                 case Key.Left:
-                    g.QueueMove(GameThreaded.Move.MoveLeft);
+                    g.DoMove(ITetris.Move.Left);
                     break;
                 case Key.Right:
-                    g.QueueMove(GameThreaded.Move.MoveRight);
+                    g.DoMove(ITetris.Move.Right);
                     break;
                 case Key.Down:
-                    g.QueueMove(GameThreaded.Move.Advance);
+                    g.DoMove(ITetris.Move.SoftDrop);
                     break;
                 case Key.Z:
-                    g.QueueMove(GameThreaded.Move.RotateLeft);
+                    g.DoMove(ITetris.Move.RotateLeft);
                     break;
                 case Key.X:
-                    g.QueueMove(GameThreaded.Move.RotateRight);
+                    g.DoMove(ITetris.Move.RotateRight);
                     break;
                 case Key.Space:
-                    g.QueueMove(GameThreaded.Move.Slam);
+                    g.DoMove(ITetris.Move.HardDrop);
                     break;  
             }
         }

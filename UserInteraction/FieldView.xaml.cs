@@ -1,23 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Resources;
 using System.Windows.Shapes;
 
-namespace WPFTris.Graphics
+namespace WPFTris.UserInteraction
 {
     /// <summary>
     /// Логика взаимодействия для FieldView.xaml
@@ -218,6 +210,7 @@ namespace WPFTris.Graphics
             return image;
         }
 
+        #region Properties
         public int TileSize
         {
             get { return (int)GetValue(TileSizeProperty); }
@@ -253,6 +246,7 @@ namespace WPFTris.Graphics
             get { return (int)GetValue(LineClearFadeOutProperty); }
             set { SetValue(LineClearFadeOutProperty, value); }
         }
+        #endregion
 
         public event EventHandler LineClearAnimCompleted;
 

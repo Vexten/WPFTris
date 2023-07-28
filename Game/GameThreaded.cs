@@ -6,7 +6,7 @@ using WPFTris.Base;
 
 namespace WPFTris.Game
 {
-    internal class GameThreaded
+    internal class GameThreaded : ITetris
     {
         public const int PollInterval = 10;
         public const int InitialFallInterval = PollInterval * 50;
@@ -14,7 +14,7 @@ namespace WPFTris.Game
 
         private readonly Game g;
         private readonly Thread mainThread;
-        private readonly Queue<Move> moves;
+        private readonly Queue<ITetris.Move> moves;
         private readonly Stopwatch tickWatch;
         private int currentFallInterval;
         private int fallTimer;
@@ -36,15 +36,15 @@ namespace WPFTris.Game
                 {
                     if (moves.Count > 0)
                     {
-                        Move last = moves.ElementAt(moves.Count - 1);
-                        if (last != Move.Slam && last != Move.Advance)
+                        ITetris.Move last = moves.ElementAt(moves.Count - 1);
+                        if (last != ITetris.Move.HardDrop && last != ITetris.Move.SoftDrop)
                         {
-                            moves.Enqueue(Move.Advance);
+                            moves.Enqueue(ITetris.Move.SoftDrop);
                         }
                     }
                     else
                     {
-                        moves.Enqueue(Move.Advance);
+                        moves.Enqueue(ITetris.Move.SoftDrop);
                     }
                 }
                 _DoMoves();
@@ -60,77 +60,44 @@ namespace WPFTris.Game
         {
             while (moves.Count > 0)
             {
-                switch (moves.Dequeue())
+                ITetris.Move move = moves.Dequeue();
+                g.DoMove(move);
+                if (move == ITetris.Move.SoftDrop || move == ITetris.Move.HardDrop)
                 {
-                    case Move.Advance:
-                        g.Advance();
-                        fallTimer = currentFallInterval;
-                        break;
-                    case Move.RotateLeft:
-                        g.RotatePiece(Polyminoe.RotationDir.Left);
-                        break;
-                    case Move.RotateRight:
-                        g.RotatePiece(Polyminoe.RotationDir.Right);
-                        break;
-                    case Move.MoveLeft:
-                        g.MovePiece(Game.MovementDir.Left);
-                        break;
-                    case Move.MoveRight:
-                        g.MovePiece(Game.MovementDir.Right);
-                        break;
-                    case Move.Slam:
-                        g.Slam();
-                        fallTimer = currentFallInterval;
-                        break;
+                    fallTimer = currentFallInterval;
                 }
             }
         }
 
-        private void _RecalculateFallInterval(int[] lines)
+        private void _RecalculateFallInterval(ITetris t, int[] lines)
         {
             currentFallInterval = InitialFallInterval - g.Level * (PollInterval * 2);
             if (currentFallInterval < MinFallInterval) currentFallInterval = MinFallInterval;
         }
 
-        public enum Move
-        {
-            RotateLeft,
-            RotateRight,
-            MoveLeft,
-            MoveRight,
-            Advance,
-            Slam
-        }
-
         #region Game_fake_overrides
-        public event Game.LineClearHandler LineClear
+        public event ITetris.LineClearHandler LineClear
         {
             add { g.LineClear += value; }
             remove { g.LineClear -= value; }
         }
 
-        public event Game.LossHandler Loss
+        public event ITetris.BasicHandler Loss
         {
             add { g.Loss += value; }
             remove { g.Loss -= value; }
         }
 
-        public event Game.PieceDropHandler PieceDrop
+        public event ITetris.PieceDropHandler PieceDrop
         {
             add { g.PieceDrop += value; }
             remove { g.PieceDrop -= value; }
         }
 
-        public event Game.PieceMoveHandler PieceMove
+        public event ITetris.BasicHandler PieceMove
         {
             add { g.PieceMove += value; }
             remove { g.PieceMove -= value; }
-        }
-
-        public event Game.RedrawHandler Redraw
-        {
-            add { g.Redraw += value; }
-            remove { g.Redraw -= value; }
         }
 
         public PolyminoeFactory.Piece NextPiece => g.NextPiece;
@@ -152,7 +119,7 @@ namespace WPFTris.Game
         {
             g = new Game(w, h);
             mainThread = new Thread(_Loop);
-            moves = new Queue<Move>();
+            moves = new Queue<ITetris.Move>();
             tickWatch = new Stopwatch();
             fallTimer = InitialFallInterval;
             currentFallInterval = InitialFallInterval;
@@ -160,7 +127,7 @@ namespace WPFTris.Game
             operate = true;
         }
 
-        public void QueueMove(Move move)
+        public void DoMove(ITetris.Move move)
         {
             moves.Enqueue(move);
         }

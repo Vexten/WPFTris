@@ -34,7 +34,8 @@ namespace WPFTris.Base
         public delegate void LineClearHandler(ITetris sender, int[] lines);
         public event LineClearHandler? LineClear;
 
-        public delegate void PieceDropHandler(ITetris sender, TetrominoeFactory);
+        public delegate void PieceDropHandler(ITetris sender, PolyminoeFactory.Piece piece);
+        public event PieceDropHandler? PieceDrop;
 
         public enum Move
         {
@@ -48,7 +49,7 @@ namespace WPFTris.Base
 
         public void DoMove(Move move);
 
-        public void FieldAt(int x, int y);
+        public int FieldAt(int x, int y);
 
         public int GetPieceCount(int piece);
     }
