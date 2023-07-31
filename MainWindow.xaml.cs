@@ -77,7 +77,7 @@ namespace WPFTris
             TotalLinesDisplay.Content = $"Lines: {g.TotalLines}";
             foreach (Label l in pieceCount)
             {
-                l.Content = 0;
+                l.Content = "000";
             }
         }
 
@@ -90,7 +90,7 @@ namespace WPFTris
                 PieceStatGrid.RowDefinitions.Add(new RowDefinition());
                 pieceCount[pInt] = new Label
                 {
-                    Content = "0",
+                    Content = "000",
                     Style = Resources["InfoLabel"] as Style,
                 };
                 pieceDisplays[pInt].Small.HorizontalAlignment = HorizontalAlignment.Center;
@@ -182,7 +182,7 @@ namespace WPFTris
             Dispatcher.BeginInvoke(_DrawField);
             Dispatcher.BeginInvoke(_DisplayNext, g.NextPiece.name);
             Dispatcher.BeginInvoke(() => { ScoreLabel.Content = $"Score: {g.Score}"; });
-            Dispatcher.BeginInvoke(() => { pieceCount[p.name].Content = g.GetPieceCount(p.name); });
+            Dispatcher.BeginInvoke(() => { pieceCount[p.name].Content = $"{g.GetPieceCount(p.name):000}"; });
         }
 
         private void _LineClear(ITetris t, int[] lines)
