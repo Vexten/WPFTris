@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:WPFTris"
         mc:Ignorable="d"
         Title="Tetris" Height="600" Width="800" ResizeMode="NoResize"
-        KeyDown="Window_KeyDown" Closed="Window_Closed">
+        KeyDown="Window_KeyDown" Closed="Window_Closed" KeyUp="Window_KeyUp">
     <Window.Resources>
         <Style x:Key="BaseSquare" TargetType="FrameworkElement">
             <Setter Property="Width" Value="{Binding RelativeSource={RelativeSource Mode=Self},Path=ActualHeight}"/>

@@ -3,16 +3,17 @@ using System.Linq;
 using System.Threading;
 using System.Diagnostics;
 using WPFTris.Base;
+using System;
 
 namespace WPFTris.Game
 {
-    internal class GameThreaded : ITetris
+    internal class GameThreaded : ITetris, ITetrisThreaded
     {
         public const int PollInterval = 10;
         public const int InitialFallInterval = PollInterval * 50;
         public const int MinFallInterval = PollInterval * 5;
 
-        private readonly Game g;
+        private readonly ITetris g;
         private readonly Thread mainThread;
         private readonly Queue<ITetris.Move> moves;
         private readonly Stopwatch tickWatch;
@@ -20,6 +21,7 @@ namespace WPFTris.Game
         private int fallTimer;
         private bool operate;
         private readonly ManualResetEvent m;
+        private bool isPaused;
 
         private void _Loop()
         {
@@ -76,25 +78,25 @@ namespace WPFTris.Game
         }
 
         #region Game_fake_overrides
-        public event ITetris.LineClearHandler LineClear
+        public event ITetris.LineClearHandler? LineClear
         {
             add { g.LineClear += value; }
             remove { g.LineClear -= value; }
         }
 
-        public event ITetris.BasicHandler Loss
+        public event ITetris.BasicHandler? Loss
         {
             add { g.Loss += value; }
             remove { g.Loss -= value; }
         }
 
-        public event ITetris.PieceDropHandler PieceDrop
+        public event ITetris.PieceDropHandler? PieceDrop
         {
             add { g.PieceDrop += value; }
             remove { g.PieceDrop -= value; }
         }
 
-        public event ITetris.BasicHandler PieceMove
+        public event ITetris.BasicHandler? PieceMove
         {
             add { g.PieceMove += value; }
             remove { g.PieceMove -= value; }
@@ -115,9 +117,18 @@ namespace WPFTris.Game
         public int GetPieceCount(int piece) => g.GetPieceCount(piece);
         #endregion
 
-        public GameThreaded(int w, int h)
+        public bool IsPaused
         {
-            g = new Game(w, h);
+            get => isPaused;
+        }
+
+        public GameThreaded(ITetris g)
+        {
+            if (g is ITetrisThreaded)
+            {
+                throw new ArgumentException("Only use nonthreaded Tetris with this wrapper.");
+            }
+            this.g = g;
             mainThread = new Thread(_Loop);
             moves = new Queue<ITetris.Move>();
             tickWatch = new Stopwatch();
@@ -125,6 +136,7 @@ namespace WPFTris.Game
             currentFallInterval = InitialFallInterval;
             m = new ManualResetEvent(true);
             operate = true;
+            isPaused = false;
         }
 
         public void DoMove(ITetris.Move move)
@@ -140,12 +152,14 @@ namespace WPFTris.Game
         public void Pause()
         {
             m.Reset();
+            isPaused = true;
         }
 
         public void Resume()
         {
-            g.Advance();
+            g.DoMove(ITetris.Move.SoftDrop);
             m.Set();
+            isPaused = false;
         }
 
         public void Stop()

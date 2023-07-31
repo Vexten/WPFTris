@@ -35,6 +35,7 @@ namespace WPFTris
         private readonly int w, h;
         private readonly Label[] pieceCount;
         private readonly PieceImage[] pieceDisplays;
+        private readonly Controller c;
 
         private struct PieceImage
         {
@@ -47,7 +48,8 @@ namespace WPFTris
             InitializeComponent();
             w = FieldView.WidthInTiles;
             h = FieldView.HeightInTiles;
-            g = new GameThreaded(w, h);
+            g = new GameThreaded(new Game.Game(w, h));
+            c = new Controller(g, 50);
 
             pieceDisplays = new PieceImage[pieceColor.Keys.Count];
             _SetPieceDisplays();
@@ -65,6 +67,7 @@ namespace WPFTris
             ScoreLabel.Content = $"Score: {g.Score}";
 
             g.Start();
+            c.Start();
         }
 
         private void _FillPieceStats()
@@ -239,31 +242,66 @@ namespace WPFTris
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            c.Stop();
             g.Stop();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
+            Action<ITetris.Move> kh;
+            if (Keyboard.Modifiers == ModifierKeys.Shift)
+            {
+                kh = (ITetris.Move m) => { c.Add(m); };
+            }
+            else
+            {
+                kh = g.DoMove;
+            }
             switch (e.Key)
             {
                 case Key.Left:
-                    g.DoMove(ITetris.Move.Left);
+                    kh(ITetris.Move.Left);
                     break;
                 case Key.Right:
-                    g.DoMove(ITetris.Move.Right);
+                    kh(ITetris.Move.Right);
                     break;
                 case Key.Down:
-                    g.DoMove(ITetris.Move.SoftDrop);
+                    kh(ITetris.Move.SoftDrop);
                     break;
                 case Key.Z:
-                    g.DoMove(ITetris.Move.RotateLeft);
+                    kh(ITetris.Move.RotateLeft);
                     break;
                 case Key.X:
-                    g.DoMove(ITetris.Move.RotateRight);
+                    kh(ITetris.Move.RotateRight);
                     break;
                 case Key.Space:
-                    g.DoMove(ITetris.Move.HardDrop);
+                    kh(ITetris.Move.HardDrop);
                     break;  
+            }
+        }
+
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.Left:
+                    c.Remove(ITetris.Move.Left);
+                    break;
+                case Key.Right:
+                    c.Remove(ITetris.Move.Right);
+                    break;
+                case Key.Down:
+                    c.Remove(ITetris.Move.SoftDrop);
+                    break;
+                case Key.Z:
+                    c.Remove(ITetris.Move.RotateLeft);
+                    break;
+                case Key.X:
+                    c.Remove(ITetris.Move.RotateRight);
+                    break;
+                case Key.Space:
+                    c.Remove(ITetris.Move.HardDrop);
+                    break;
             }
         }
     }
