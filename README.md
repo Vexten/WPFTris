@@ -11,7 +11,9 @@ Study project
 
 - [ ] Display Part
 
-  Currently almost completely running on debug graphics
+  - [x] Custom font
+  - [ ] Background
+  - [ ] Minor touch-ups
 
 ## Current Look
 
