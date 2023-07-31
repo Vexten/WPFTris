@@ -5,15 +5,23 @@ Study project
 
 ## Current Status
 
-- [x] Tetris Part
+- [ ] Tetris Part
 
-  The tetris itself seems to be working aside from maybe a few bugs
+  - [x] A-type
+  - [ ] B-type
+  - [ ] Level select
 
 - [ ] Display Part
 
+  - [x] Custom Tetris field display
   - [x] Custom font
   - [ ] Background
   - [ ] Minor touch-ups
+
+- [ ] Features
+  
+  - [ ] Saving top score
+  - [ ] Local leaderboard
 
 ## Current Look
 
