@@ -300,7 +300,7 @@ namespace WPFTris.Game
             {
                 currPoint.y -= 1;
             }
-            _SetPiece((int)curr.name);
+            _SetPiece(curr.name);
             if (sw)
             {
                 linesWereCleared = _CheckLines();
@@ -310,11 +310,12 @@ namespace WPFTris.Game
                     _Init();
                     return;
                 }
-                totalPieces[(int)curr.name]++;
+                totalPieces[curr.name]++;
                 currPoint.Copy(basePoint);
+                PolyminoeFactory.Piece p = curr;
                 curr = next;
                 next = factory.GetPiece();
-                PieceDrop?.Invoke(this, curr);
+                PieceDrop?.Invoke(this, p);
                 if (linesWereCleared) LineClear?.Invoke(this, clearedLines.ToArray());
             }
             else

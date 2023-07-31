@@ -60,14 +60,25 @@ namespace WPFTris
             g.PieceDrop += _NewPiece;
             g.LineClear += _LineClear;
             g.PieceMove += _DrawFieldLocal;
-            g.Loss += (ITetris t) => { Dispatcher.BeginInvoke(_DrawField); };
+            g.Loss += _ResetGame;
             FieldView.LineClearAnimCompleted += _Resume;
 
-            LevelLabel.Content = $"Level: {g.Level}";
-            ScoreLabel.Content = $"Score: {g.Score}";
+            _ResetCounters();
+            
 
             g.Start();
             c.Start();
+        }
+
+        private void _ResetCounters()
+        {
+            LevelLabel.Content = $"Level: {g.Level}";
+            ScoreLabel.Content = $"Score: {g.Score}";
+            TotalLinesDisplay.Content = $"Lines: {g.TotalLines}";
+            foreach (Label l in pieceCount)
+            {
+                l.Content = 0;
+            }
         }
 
         private void _FillPieceStats()
@@ -80,10 +91,7 @@ namespace WPFTris
                 pieceCount[pInt] = new Label
                 {
                     Content = "0",
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalContentAlignment = HorizontalAlignment.Center,
-                    VerticalContentAlignment = VerticalAlignment.Center,
+                    Style = Resources["InfoLabel"] as Style,
                 };
                 pieceDisplays[pInt].Small.HorizontalAlignment = HorizontalAlignment.Center;
                 pieceDisplays[pInt].Small.VerticalAlignment = VerticalAlignment.Center;
@@ -121,8 +129,8 @@ namespace WPFTris
             bottomRight = topLeft + bottomRight + new Point<int>(1,1);
             FieldView f = new();
             f.TileSize = MarkupPieceDisplay.TileSize;
-            f.TileOverlay = @"img/tile_overlay.png";
-            f.BackgroundTile = @"img/tile_transparent.png";
+            f.TileOverlay = @"Resources/tile_overlay.png";
+            f.BackgroundTile = @"Resources/tile_transparent.png";
             f.WidthInTiles = bottomRight.x;
             f.HeightInTiles = bottomRight.y;
             foreach (var p in piece)
@@ -174,7 +182,7 @@ namespace WPFTris
             Dispatcher.BeginInvoke(_DrawField);
             Dispatcher.BeginInvoke(_DisplayNext, g.NextPiece.name);
             Dispatcher.BeginInvoke(() => { ScoreLabel.Content = $"Score: {g.Score}"; });
-            Dispatcher.BeginInvoke(() => { pieceCount[p.name].Content = g.GetPieceCount(p.name).ToString(); });
+            Dispatcher.BeginInvoke(() => { pieceCount[p.name].Content = g.GetPieceCount(p.name); });
         }
 
         private void _LineClear(ITetris t, int[] lines)
@@ -187,6 +195,12 @@ namespace WPFTris
             {
                 Dispatcher.BeginInvoke(() => { FieldView.LineClear(line); });
             }
+        }
+
+        private void _ResetGame(ITetris t)
+        {
+            Dispatcher.BeginInvoke(_DrawField);
+            Dispatcher.BeginInvoke(_ResetCounters);
         }
 
         private void _Resume(object? sender, EventArgs e)
@@ -248,6 +262,10 @@ namespace WPFTris
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.Escape)
+            {
+                Close();
+            }
             Action<ITetris.Move> kh;
             if (Keyboard.Modifiers == ModifierKeys.Shift)
             {

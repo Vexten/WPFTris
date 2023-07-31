@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:WPFTris"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <FontFamily x:Key="PTYPE">pack://application:,,,/Resources/#PTYPE</FontFamily>
     </Application.Resources>
 </Application>

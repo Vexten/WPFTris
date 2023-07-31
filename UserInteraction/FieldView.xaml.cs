@@ -199,7 +199,7 @@ namespace WPFTris.UserInteraction
             {
                 Trace.WriteLine($"{uri} doesn't exist, or you are currently inside of Designer.\n" +
                     $"Falling back on error sprite.");
-                inf = Application.GetResourceStream(new Uri(@"pack://application:,,,/WPFTris;component/img/error_sprite.png"));
+                inf = Application.GetResourceStream(new Uri(@"pack://application:,,,/WPFTris;component/Resources/error_sprite.png"));
             }
             BitmapImage image = new();
             image.BeginInit();

@@ -11,28 +11,30 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 
   <ItemGroup>
-    <None Remove="img\tile_background.png" />
-    <None Remove="img\tile_black.png" />
-    <None Remove="img\tile_transparent.png" />
+    <None Remove="Resources\PTYPE.ttf" />
+    <None Remove="Resources\tile_background.png" />
+    <None Remove="Resources\tile_black.png" />
+    <None Remove="Resources\tile_transparent.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="img\tile_background.png">
+    <Content Include="Resources\tile_background.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="img\tile_black.png">
+    <Content Include="Resources\tile_black.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="img\tile_overlay.png">
+    <Content Include="Resources\tile_overlay.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="img\tile_transparent.png">
+    <Content Include="Resources\tile_transparent.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="img\error_sprite.png" />
+    <Resource Include="Resources\error_sprite.png" />
+    <Resource Include="Resources\PTYPE.ttf" />
   </ItemGroup>
 
 </Project>
